@@ -59,6 +59,7 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
   // Stati Modale Errore custom
   const [alertOpen, setAlertOpen] = useState(false)
   const [alertMessage, setAlertMessage] = useState('')
+  const [temporaryPassword, setTemporaryPassword] = useState<string | null>(null)
 
   // Stati Modale Conferma Cancellazione
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
@@ -109,7 +110,11 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
     }
   }
 
-  const showAlert = (message: string) => { setAlertMessage(message); setAlertOpen(true) }
+  const showAlert = (message: string, password?: string) => {
+    setAlertMessage(message)
+    setTemporaryPassword(password || null)
+    setAlertOpen(true)
+  }
 
   const handleCreateUser = async () => {
     setLoading(true)
@@ -118,7 +123,7 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
     if (result.error) return showAlert(result.error)
     if (result.member) setMembers(current => [...current, result.member].sort((a, b) => `${a.cognome} ${a.nome}`.localeCompare(`${b.cognome} ${b.nome}`)))
     setNewNome(''); setNewCognome(''); setNewEmail(''); setIsNewUserModalOpen(false)
-    showAlert(result.warning || 'Account creato e invito inviato.')
+    showAlert(result.warning || 'Account creato e invito inviato.', result.temporaryPassword)
   }
 
   const handleResendInvitation = async (member: Member) => {
@@ -127,7 +132,7 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
     setLoading(false)
     if (result.error) {
       setMembers(current => current.map(item => item.id === member.id ? { ...item, invitation_status: 'failed' } : item))
-      showAlert(result.error)
+      showAlert(result.error, result.temporaryPassword)
     } else {
       setMembers(current => current.map(item => item.id === member.id ? { ...item, invitation_status: 'sent' } : item))
       showAlert('Nuova password temporanea inviata. Quella precedente non è più valida.')
@@ -417,13 +422,21 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
       </Dialog>
 
       {/* --- Modale Errore Custom --- */}
-      <AlertDialog open={alertOpen} onOpenChange={setAlertOpen}>
+      <AlertDialog open={alertOpen} onOpenChange={open => { setAlertOpen(open); if (!open) setTemporaryPassword(null) }}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Attenzione</AlertDialogTitle>
-            <AlertDialogDescription>{alertMessage}</AlertDialogDescription>
+            <AlertDialogDescription>
+              <p>{alertMessage}</p>
+              {temporaryPassword && <div className="mt-4 rounded-md border border-amber-300 bg-amber-50 p-3 text-amber-950 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-100">
+                <p className="font-medium">Password temporanea da consegnare con un canale sicuro</p>
+                <code className="mt-2 block break-all rounded bg-white p-2 font-mono text-sm dark:bg-slate-900">{temporaryPassword}</code>
+                <p className="mt-2 text-xs">È visibile soltanto ora e verrà sostituita obbligatoriamente al primo accesso.</p>
+              </div>}
+            </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
+            {temporaryPassword && <Button type="button" variant="outline" onClick={() => navigator.clipboard.writeText(temporaryPassword)}>Copia password</Button>}
             <AlertDialogAction className="bg-blue-600 hover:bg-blue-700">Ho Capito</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -50,7 +50,11 @@ export async function createUserAction(nome: string, cognome: string, email: str
     } catch (error) {
       await recordInvitationDelivery(env.DB, invitation.id, false)
       revalidatePath('/dashboard/team')
-      return { warning: error instanceof UserError ? error.message : 'Account creato, ma invio email non riuscito.', member: { ...publicMember(invitation), invitation_status: 'failed' as const } }
+      return {
+        warning: error instanceof UserError ? error.message : 'Account creato, ma invio email non riuscito.',
+        temporaryPassword: invitation.password,
+        member: { ...publicMember(invitation), invitation_status: 'failed' as const },
+      }
     }
   } catch (error) {
     if (error instanceof UserError) return { error: error.message }
@@ -72,7 +76,10 @@ export async function resendInvitationAction(profileId: string) {
       return { success: true }
     } catch (error) {
       await recordInvitationDelivery(env.DB, invitation.id, false)
-      return { error: error instanceof UserError ? error.message : 'Invio email non riuscito.' }
+      return {
+        error: error instanceof UserError ? error.message : 'Invio email non riuscito.',
+        temporaryPassword: invitation.password,
+      }
     }
   } catch (error) {
     if (error instanceof UserError) return { error: error.message }

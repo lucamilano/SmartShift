@@ -82,7 +82,7 @@ npx wrangler secret put EMAIL_FROM
 npx wrangler secret put EMAIL_FROM_NAME
 ```
 
-Per la prova, `EMAIL_FROM` può essere `SmartShift <onboarding@resend.dev>`. In produzione deve contenere un indirizzo del dominio verificato, per esempio `SmartShift <accesso@example.com>`; `EMAIL_FROM_NAME` è usato soltanto quando `EMAIL_FROM` non è impostato. Dopo il deploy creare un utente con una casella di test e verificare ricezione, scadenza, cambio obbligatorio e reinvio. L'app non salva mai la password temporanea in chiaro: se l'invio fallisce, occorre usare «Reinvia invito», che ne genera una nuova.
+Per la prova, `EMAIL_FROM` può essere `SmartShift <onboarding@resend.dev>`. In produzione deve contenere un indirizzo del dominio verificato, per esempio `SmartShift <accesso@example.com>`; `EMAIL_FROM_NAME` è usato soltanto quando `EMAIL_FROM` non è impostato. Dopo il deploy creare un utente con una casella di test e verificare ricezione, scadenza, cambio obbligatorio e reinvio. L'app non salva mai la password temporanea in chiaro: se l'invio fallisce, la mostra una sola volta all'amministratore che ha creato o reinviato l'account, così può consegnarla con un canale sicuro. Il reinvio genera una nuova password e invalida quella precedente.
 
 In sviluppo locale gli stessi nomi possono essere inseriti in `.dev.vars`, che è escluso da Git. Senza questi valori l'account viene comunque creato in stato «invio non riuscito», così la configurazione può essere corretta e l'invito reinviato dal pannello.
 

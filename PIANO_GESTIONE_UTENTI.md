@@ -33,7 +33,7 @@ La promozione ad amministratore è già implementata: va mantenuta e testata nel
 3. Se l'email esiste già, anche per un account disattivato, la creazione si ferma con un messaggio. Non deve resettare credenziali, riattivare utenti o cambiare privilegi implicitamente.
 4. Il server genera una password casuale crittograficamente sicura, compatibile con la policy Better Auth, e salva soltanto l'hash. Crea account e profilo collegati con ruolo `user`, indipendentemente da eventuali valori di ruolo inviati dal browser.
 5. L'account viene marcato come «cambio password obbligatorio». Il sistema invia un'email con nome, URL di login, email dell'account, password temporanea e scadenza.
-6. Il pannello mostra l'esito reale: account creato e invio accettato, oppure account creato ma invio fallito. L'accettazione del messaggio da parte del servizio non garantisce la consegna in casella.
+6. Il pannello mostra l'esito reale: account creato e invio accettato, oppure account creato ma invio fallito. Nel secondo caso mostra una sola volta all'amministratore la password temporanea generata per quell'account, da consegnare tramite un canale alternativo. L'accettazione del messaggio da parte del servizio non garantisce la consegna in casella.
 7. Il collega accede con la password temporanea ed entra in una sessione limitata al cambio password e al logout.
 8. Dopo un cambio riuscito, verificato sul server, vengono rimossi l'obbligo e la scadenza, invalidate le altre sessioni e abilitata la normale navigazione. La vecchia password non funziona più.
 9. L'amministratore può successivamente modificare nome, cognome e ruolo; la promozione ad admin richiede una sua azione esplicita.
@@ -105,7 +105,7 @@ Questi punti non sono integrazioni Supabase residue: sono limiti e testi del flu
 - [x] Solo un admin attivo può creare utenti, reinviare inviti o modificare ruoli, anche chiamando direttamente le azioni server.
 - [x] Nome/cognome/email obbligatori; duplicati e richieste concorrenti non creano utenti doppi e non resettano utenti esistenti.
 - [x] Nuovi utenti sempre `user`; promozione solo tramite modifica esplicita dell'amministratore.
-- [x] Creazione coerente di credenziali e profilo; nessuna password in log, risposte o database in chiaro.
+- [x] Creazione coerente di credenziali e profilo; nessuna password in log o database in chiaro. In caso di invio fallito, la password temporanea è restituita una sola volta alla sessione dell'amministratore che ha creato o reinviato l'invito.
 - [ ] Email contiene URL corretto, credenziale temporanea e scadenza; errore di invio visibile e reinvio recuperabile.
 - [x] Credenziale sostituita non funziona; il reinvio non riattiva account disabilitati. La scadenza viene controllata prima dell'accesso applicativo.
 - [x] Primo accesso limitato al cambio password: URL diretti, API, export e server action non consentono aggiramenti.

@@ -1,70 +1,49 @@
 # SmartShift
 
-Gestione presenze, smartworking, ferie e malattia con calendario, amministrazione utenti ed export Excel.
+SmartShift è un'applicazione web per organizzare presenze, smart working, ferie e assenze del team.
 
-Corporate attendance and shift planner with personal calendars, user administration, and Excel reports.
+## Funzionalità
 
-[Apri SmartShift](https://smartshift-164.pages.dev) · [Guida Cloudflare](CLOUDFLARE.md) · [Cronologia modifiche](CHANGELOG.md)
+- Calendario personale delle presenze.
+- Gestione di giornate in ufficio, smart working, ferie e malattia.
+- Vista amministrativa del team.
+- Creazione, modifica e disattivazione degli utenti.
+- Ruoli utente e amministratore.
+- Inviti con password temporanea e cambio obbligatorio al primo accesso.
+- Esportazione dei dati in formato Excel.
+- Interfaccia responsive con tema chiaro e scuro.
 
-## Novità: migrazione a Cloudflare
+## Tecnologie
 
-Dal 17 settembre 2026 il progetto usa Cloudflare per hosting, database e autenticazione. Il login passa dal magic link a **email e password**, con cambio password nella pagina Account. Calendario, gestione dei profili, disattivazione utenti ed esportazione Excel restano disponibili.
-
-Gli amministratori possono creare un collega inserendo nome, cognome ed email. Il nuovo account nasce come utente base, riceve una password temporanea valida 24 ore e deve cambiarla al primo accesso. L'amministratore può assegnare in seguito il ruolo admin. L'invio usa Resend e richiede la [configurazione del mittente](CLOUDFLARE.md#email-di-invito).
-
-La migrazione parte da un database nuovo: utenti e dati di Supabase non vengono importati. Non occorre configurare Cloudflare Access o un team Zero Trust. I dettagli delle modifiche sono nel [changelog](CHANGELOG.md#2026-09-17--migrazione-a-cloudflare).
-
-## Stack
-
-- **Cloudflare Pages**: indirizzo pubblico `smartshift-164.pages.dev`.
-- **Cloudflare Workers**: applicazione Next.js App Router con OpenNext.
-- **Cloudflare D1**: profili, presenze, credenziali e sessioni.
-- **Better Auth**: login email/password, sessioni, cambio password e limiti ai tentativi.
-- React, Tailwind CSS, Shadcn/Radix UI, date-fns ed ExcelJS.
-
-Non servono Supabase, Vercel o Cloudflare Access/Zero Trust. Le registrazioni pubbliche sono disabilitate. Il database parte vuoto, senza importare dati precedenti.
+Il progetto utilizza Next.js, React, TypeScript e Tailwind CSS. L'applicazione è distribuita su Cloudflare e utilizza un database SQL gestito, autenticazione email/password e un servizio transazionale per gli inviti.
 
 ## Sviluppo locale
 
-Richiede Node.js 22.13+. Su PowerShell con script disabilitati usare `npm.cmd` e `npx.cmd`.
+Richiede Node.js 22.13 o successivo.
 
 ```sh
 npm ci
 ```
 
-Copiare `.dev.vars.example` in `.dev.vars` e impostare un segreto casuale di almeno 32 caratteri, poi:
+Copiare `.dev.vars.example` in `.dev.vars`, compilare le variabili locali e inizializzare il database di sviluppo:
 
 ```sh
 npm run db:migrate:local
-npm run auth:provision -- --local admin@example.com admin
 npm run dev -- --hostname 127.0.0.1
 ```
 
-Sostituire `admin@example.com` con la propria email. Il comando di provisioning salva le credenziali iniziali in un file locale dentro `.wrangler/private`, escluso da Git. Usarle su [127.0.0.1:3000](http://127.0.0.1:3000), cambiare la password dalla pagina Account (icona della chiave) e cancellare il file iniziale. Rieseguire il provisioning per un account esistente ne reimposta la password.
+I file `.dev.vars`, `.env`, gli artefatti di build e lo stato locale dei servizi sono esclusi da Git. Non inserire credenziali, password o token nel repository.
 
-## Test e distribuzione
+## Verifiche
 
 ```sh
 npm test
 npm run typecheck
 npm run lint
-npm run deploy
+npm run build:cloudflare
 ```
 
-Configurazione, recupero password, database e pubblicazione: **[CLOUDFLARE.md](CLOUDFLARE.md)**.
-
-Cloudflare setup and deployment instructions are documented in [CLOUDFLARE.md](CLOUDFLARE.md) (Italian).
-
-La [GitHub Action](.github/workflows/deploy.yml) esegue test, lint e build sulle pull request. Ogni aggiornamento di **`main`** pubblica automaticamente su Cloudflare dopo i controlli, una volta configurato il secret `CLOUDFLARE_API_TOKEN`: [attivazione iniziale](CLOUDFLARE.md#deploy-automatico). È disponibile anche l'avvio manuale dalla scheda Actions. Il deploy da PC resta disponibile con `npm run deploy`.
-
-## Documentazione
-
-| Documento | Contenuto |
-| --- | --- |
-| [README](README.md) | Panoramica, novità e avvio rapido |
-| [Guida Cloudflare](CLOUDFLARE.md) | Architettura, configurazione, account, database e deploy |
-| [Changelog](CHANGELOG.md) | Modifiche datate e cambiamenti da considerare negli aggiornamenti |
-| [Piano gestione utenti](PIANO_GESTIONE_UTENTI.md) | Proposta da implementare: creazione da admin, email iniziale e cambio password obbligatorio; analisi dei riferimenti al vecchio login |
+Gli aggiornamenti del branch principale vengono verificati dalla pipeline CI prima della distribuzione.
 
 ## Licenza
 
