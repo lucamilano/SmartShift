@@ -53,7 +53,7 @@ Configurazione, recupero password, database e pubblicazione: **[CLOUDFLARE.md](C
 
 Cloudflare setup and deployment instructions are documented in [CLOUDFLARE.md](CLOUDFLARE.md) (Italian).
 
-Il push su GitHub aggiorna il codice e questa documentazione; **non avvia automaticamente un deploy**. La pubblicazione su Cloudflare avviene con `npm run deploy`. La guida descrive anche le migrazioni del database e il recupero dell'accesso.
+La [GitHub Action](.github/workflows/deploy.yml) esegue test, lint e build sulle pull request. Ogni aggiornamento di **`main`** pubblica automaticamente su Cloudflare dopo i controlli, una volta configurato il secret `CLOUDFLARE_API_TOKEN`: [attivazione iniziale](CLOUDFLARE.md#deploy-automatico). È disponibile anche l'avvio manuale dalla scheda Actions. Il deploy da PC resta disponibile con `npm run deploy`.
 
 ## Documentazione
 

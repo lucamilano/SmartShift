@@ -100,11 +100,27 @@ npm run db:migrate:remote
 npm run deploy
 ```
 
-Il deploy da questo repository è via CLI. Per automatizzarlo da Git, configurare separatamente Cloudflare Workers Builds o una pipeline con un token Cloudflare limitato alle risorse necessarie; nessun segreto è incluso nel codice.
+Il deploy può avvenire via CLI oppure con la GitHub Action descritta sotto.
 
 Per una verifica del sito reale: `node scripts/smoke-live.mjs https://smartshift-164.pages.dev PERCORSO_FILE_CREDENZIALI`. Il controllo prova login, pagine, asset, Excel e revoca della sessione senza stampare password o cookie. Il file deve contenere le credenziali attuali.
 
 ExcelJS usa soltanto `uuid.v4`: un override a `uuid@11.1.1` corregge l'avviso della vecchia dipendenza mantenendo questa API CommonJS. Verificare l'export dopo aggiornamenti di ExcelJS.
+
+## Deploy automatico
+
+Il workflow [deploy.yml](.github/workflows/deploy.yml) usa Linux e Node.js 22. Esegue installazione dal lockfile, test, lint, build OpenNext e controllo TypeScript. Sulle pull request esegue soltanto i controlli; su `main` applica le migrazioni D1, pubblica il Worker e poi il gateway Pages. Infine verifica login pubblico, redirect della dashboard, protezione dell'export e assenza di sessioni anonime. Non modifica password, account o `BETTER_AUTH_SECRET` già presente sul Worker.
+
+### Attivazione iniziale
+
+1. Creare un [API token Cloudflare](https://dash.cloudflare.com/profile/api-tokens) personalizzato per l'account indicato in `wrangler.jsonc`, con permessi **Account / Workers Scripts / Edit**, **Account / D1 / Edit** e **Account / Cloudflare Pages / Edit**. Limitare le risorse all'account SmartShift; non occorrono permessi DNS o Zero Trust.
+2. Aprire [GitHub → Settings → Secrets and variables → Actions](https://github.com/lucamilano/SmartShift/settings/secrets/actions), scegliere **New repository secret**, nome `CLOUDFLARE_API_TOKEN`, e incollare lì il token. Non inserirlo nel codice, nei commit o in chat.
+3. Aprire [Actions](https://github.com/lucamilano/SmartShift/actions), selezionare **Checks and Cloudflare deploy** e scegliere **Run workflow** sul branch `main`. Da quel momento anche ogni push su `main` avvia il rilascio.
+
+Il token è necessario una sola volta, salvo scadenza o revoca. Il login OAuth Wrangler del PC non viene copiato su GitHub. Senza secret i controlli vengono eseguiti, ma il deploy si ferma con un messaggio esplicito.
+
+I rilasci dello stesso branch sono serializzati e non vengono interrotti automaticamente. Le migrazioni devono essere compatibili con la versione precedente, che può restare attiva durante il rilascio; in caso di errore non è previsto un rollback automatico del database. Il controllo pubblico verifica la raggiungibilità e le protezioni, non esegue un login con la password dell'amministratore.
+
+Riferimenti: [GitHub Actions per Workers](https://developers.cloudflare.com/workers/ci-cd/external-cicd/github-actions/) e [token per Pages](https://developers.cloudflare.com/pages/configuration/api/).
 
 ## Vecchi servizi
 

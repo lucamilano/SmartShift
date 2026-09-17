@@ -1,6 +1,13 @@
 # Cronologia modifiche
 
-Le voci descrivono le modifiche al repository. Il deploy su Cloudflare è un passaggio separato dal push su GitHub.
+Le voci descrivono le modifiche al repository. La pipeline GitHub pubblica gli aggiornamenti di `main` dopo i controlli, previa configurazione del token Cloudflare.
+
+## 2026-09-17 — Deploy automatico
+
+- Aggiunta GitHub Action per test, lint, build e TypeScript sulle pull request e su `main`.
+- Su `main`, applicazione delle migrazioni D1 e pubblicazione in sequenza di Worker e Pages, con verifica pubblica finale.
+- Aggiunti avvio manuale da Actions e serializzazione dei rilasci; nessuna credenziale applicativa viene modificata dal deploy.
+- Documentata la configurazione una tantum del repository secret `CLOUDFLARE_API_TOKEN`.
 
 ## 2026-09-17 — Migrazione a Cloudflare
 
@@ -34,5 +41,5 @@ Le voci descrivono le modifiche al repository. Il deploy su Cloudflare è un pas
 - Non vengono importati utenti o dati da Supabase: occorre inizializzare D1 e creare gli account necessari.
 - Il login richiede email e password; Cloudflare Access/Zero Trust e invio email non sono necessari.
 - Un reset tramite provisioning revoca le sessioni esistenti. La password iniziale va cambiata dalla pagina Account; il file locale va poi eliminato.
-- Il push su GitHub non pubblica automaticamente l'app. Per distribuire la versione del repository seguire la [procedura di deploy](CLOUDFLARE.md#sviluppo-e-verifiche).
+- Per distribuire la versione del repository usare la [procedura CLI](CLOUDFLARE.md#sviluppo-e-verifiche) oppure il [deploy automatico](CLOUDFLARE.md#deploy-automatico).
 - I vecchi servizi Vercel e Supabase non vengono eliminati automaticamente.
