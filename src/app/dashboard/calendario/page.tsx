@@ -1,4 +1,4 @@
-import { createClient } from '@/utils/supabase/server'
+import { requireUser, getRepository } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import CalendarClient from './calendar-client'
 import { startOfMonth, endOfMonth, format } from 'date-fns'
@@ -7,48 +7,20 @@ import { getOthersHolidays } from './actions'
 export const dynamic = 'force-dynamic'
 
 export default async function CalendarioPage({ searchParams }: { searchParams: Promise<{ userId?: string }> }) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
-
-  const resolvedSearchParams = await searchParams
-  const targetUserId = resolvedSearchParams.userId
-
-  let effectiveUserId = user.id
-  let targetUserName = ''
-
-  if (targetUserId && targetUserId !== user.id) {
-    const { data: profile } = await supabase
-      .from('profili')
-      .select('ruolo')
-      .eq('id', user.id)
-      .single()
-      
-    if (profile?.ruolo === 'admin') {
-      effectiveUserId = targetUserId
-      
-      const { data: targetProfile } = await supabase
-        .from('profili')
-        .select('nome, cognome')
-        .eq('id', targetUserId)
-        .single()
-        
-      if (targetProfile) {
-        targetUserName = `${targetProfile.nome} ${targetProfile.cognome}`
-      }
-    }
-  }
+  const user = await requireUser()
+  const repository = await getRepository()
+  const { userId: targetUserId } = await searchParams
+  const effectiveUserId = targetUserId || user.id
+  if (effectiveUserId !== user.id && user.ruolo !== 'admin') redirect('/dashboard/calendario')
+  const targetProfile = await repository.profile(effectiveUserId)
+  const targetUserName = effectiveUserId === user.id ? '' :
+    ([targetProfile.nome, targetProfile.cognome].filter(Boolean).join(' ') || targetProfile.email)
 
   // Carichiamo gli eventi del mese corrente per il primo rendering
   const startDate = format(startOfMonth(new Date()), 'yyyy-MM-dd')
   const endDate = format(endOfMonth(new Date()), 'yyyy-MM-dd')
 
-  const { data: initialEvents } = await supabase
-    .from('eventi_calendario')
-    .select('*')
-    .eq('utente_id', effectiveUserId)
-    .gte('data', startDate)
-    .lte('data', endDate)
+  const initialEvents = await repository.events(startDate, endDate, effectiveUserId)
 
   const initialOthersHolidays = await getOthersHolidays(startDate, endDate)
 

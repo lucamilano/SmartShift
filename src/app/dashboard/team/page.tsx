@@ -1,4 +1,4 @@
-import { createClient } from '@/utils/supabase/server'
+import { requireUser, getRepository } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import TeamClient from './team-client'
 import { format } from 'date-fns'
@@ -6,34 +6,13 @@ import { format } from 'date-fns'
 export const dynamic = 'force-dynamic'
 
 export default async function TeamPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
-
-  // Verifica che sia Admin
-  const { data: profile } = await supabase
-    .from('profili')
-    .select('ruolo')
-    .eq('id', user.id)
-    .single()
-
-  if (profile?.ruolo !== 'admin') {
-    redirect('/dashboard') // Solo Admin possono accedere qui
-  }
-
-  // Estrai tutti i colleghi attivi
-  const { data: teamMembers } = await supabase
-    .from('profili')
-    .select('*')
-    .eq('is_active', true)
-    .order('cognome', { ascending: true })
-
-  // Estrai le presenze di OGGI
+  const user = await requireUser()
+  if (user.ruolo !== 'admin') redirect('/dashboard')
+  const repository = await getRepository()
   const todayStr = format(new Date(), 'yyyy-MM-dd')
-  const { data: todaysEvents } = await supabase
-    .from('eventi_calendario')
-    .select('*')
-    .eq('data', todayStr)
+  const [teamMembers, todaysEvents] = await Promise.all([
+    repository.members(), repository.teamEvents(todayStr, todayStr),
+  ])
 
   // Calcola statistiche di oggi
   const stats = {

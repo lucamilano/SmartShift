@@ -1,33 +1,17 @@
 import Link from 'next/link'
-import { createClient } from '@/utils/supabase/server'
-import { redirect } from 'next/navigation'
+import { getCurrentUser } from '@/lib/auth'
+import { LogoutButton } from '@/components/logout-button'
 import { Button } from '@/components/ui/button'
-import { Calendar, Users, FileSpreadsheet, LogOut, Home } from 'lucide-react'
+import { Calendar, Users, FileSpreadsheet, KeyRound, Home } from 'lucide-react'
 import { ThemeToggle } from '@/components/theme-toggle'
 
 export async function Navbar() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  
+  const user = await getCurrentUser()
   if (!user) return null
-
-  // Andiamo a leggere il profilo dell'utente loggato per scoprire il suo ruolo
-  const { data: profile } = await supabase
-    .from('profili')
-    .select('ruolo, nome, cognome')
-    .eq('id', user.id)
-    .single()
+  const profile = user
 
   const isAdmin = profile?.ruolo === 'admin'
   
-  // Questa è una Server Action per fare il logout direttamente dalla Navbar
-  const handleSignOut = async () => {
-    'use server'
-    const supabase = await createClient()
-    await supabase.auth.signOut()
-    redirect('/login')
-  }
-
   return (
     <nav className="border-b bg-white dark:bg-[#111827] dark:border-slate-800 shadow-sm sticky top-0 z-50 transition-colors">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -84,11 +68,8 @@ export async function Navbar() {
                 <p className="text-xs text-gray-500 dark:text-gray-400">{user.email}</p>
               </div>
               
-              <form action={handleSignOut}>
-                <Button type="submit" variant="ghost" size="icon" className="text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30" title="Esci">
-                  <LogOut className="h-5 w-5" />
-                </Button>
-              </form>
+              <Button asChild variant="ghost" size="icon" title="Cambia password"><Link href="/dashboard/account"><KeyRound className="h-5 w-5" /></Link></Button>
+              <LogoutButton />
             </div>
           </div>
           

@@ -1,0 +1,22 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "smartshift",
+  "account_id": "cec6ff6e6e178ec99262e44cd53c119e",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-09-17",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  // Public traffic arrives through the dedicated Pages project service binding.
+  "workers_dev": false,
+  "preview_urls": false,
+  "assets": { "directory": ".open-next/assets", "binding": "ASSETS" },
+  "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "smartshift" }],
+  "d1_databases": [{
+    "binding": "DB",
+    "database_name": "smartshift-db",
+    "database_id": "daa4b489-b1df-488d-8e77-c66958b89de4",
+    "migrations_dir": "migrations"
+  }],
+  "vars": {
+    "APP_URL": "https://smartshift-164.pages.dev"
+  }
+}

@@ -26,6 +26,7 @@ import { updateProfile, deleteUserAction } from './actions'
 
 type Member = {
   id: string
+  email: string
   nome: string
   cognome: string
   ruolo: string
@@ -36,7 +37,7 @@ type Event = {
   tipo: string
 }
 
-export default function TeamClient({ initialMembers, todaysEvents, stats }: { initialMembers: Member[], todaysEvents: Event[], stats: any }) {
+export default function TeamClient({ initialMembers, todaysEvents, stats }: { initialMembers: Member[], todaysEvents: Event[], stats: Record<'ufficio' | 'smartworking' | 'ferie' | 'malattia' | 'assenti_non_giustificati', number> }) {
   const [members, setMembers] = useState<Member[]>(initialMembers)
   
   // Stati Modale Modifica User
@@ -114,7 +115,7 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
             Gestione Team
           </h1>
           <p className="text-gray-500 dark:text-slate-400 mt-2 text-lg">
-            Monitora le presenze di oggi, gestisci l'anagrafica e inserisci turni per conto degli altri.
+            Monitora le presenze di oggi, gestisci l’anagrafica e inserisci turni per conto degli altri.
           </p>
         </div>
         <Button onClick={() => setIsNewUserModalOpen(true)} className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 dark:text-white">
@@ -187,7 +188,7 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
                         </AvatarFallback>
                       </Avatar>
                       <div>
-                        <div className="font-semibold text-gray-900 dark:text-white">{member.nome} {member.cognome}</div>
+                        <div className="font-semibold text-gray-900 dark:text-white">{[member.nome, member.cognome].filter(Boolean).join(' ') || member.email}</div>
                         <div className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">
                           {member.ruolo === 'admin' 
                             ? <span className="font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-1.5 py-0.5 rounded-sm uppercase tracking-wider">Admin</span>
@@ -265,7 +266,7 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
                             {(member.nome?.[0] || 'U') + (member.cognome?.[0] || '')}
                           </AvatarFallback>
                         </Avatar>
-                        <span>{member.nome} {member.cognome}</span>
+                        <span>{[member.nome, member.cognome].filter(Boolean).join(' ') || member.email}</span>
                       </div>
                     </TableCell>
                     <TableCell>
@@ -317,7 +318,7 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
           <DialogHeader>
             <DialogTitle className="text-xl">Modifica Anagrafica</DialogTitle>
             <DialogDescription>
-              Modifica i dati di questo collega. Per cambiare l'email, contatta il supporto.
+              Modifica i dati di questo collega. Per cambiare l’email, contatta il supporto.
             </DialogDescription>
           </DialogHeader>
           
@@ -356,7 +357,7 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
         </DialogContent>
       </Dialog>
 
-      {/* --- Modale "Nuovo Collega" (Info Magic Link) --- */}
+      {/* --- Modale "Nuovo Collega" (Primo accesso) --- */}
       <Dialog open={isNewUserModalOpen} onOpenChange={setIsNewUserModalOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -370,7 +371,7 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
             <div className="bg-blue-50 text-blue-800 p-4 rounded-xl border border-blue-100 flex items-start">
               <Info className="h-5 w-5 mr-3 mt-0.5 shrink-0" />
               <p className="text-sm leading-relaxed">
-                Grazie al sistema "Magic Link", il tuo gestionale non richiede la creazione manuale di credenziali.
+                Le registrazioni pubbliche sono disabilitate. Ogni account viene creato dall’amministratore.
               </p>
             </div>
             
@@ -378,10 +379,10 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
               Per aggiungere un nuovo collega segui questi step:
             </p>
             <ol className="list-decimal pl-5 text-sm space-y-2 font-medium text-gray-700">
-              <li>Invia il link al collega in questo momento (es. <strong>http://tuosito.com/login</strong>).</li>
-              <li>Scrivigli di inserire la sua email lavorativa.</li>
-              <li>Appena farà il suo primo accesso, <strong>il sistema creerà magicamente l'account</strong>.</li>
-              <li>Il collega apparirà in questa tabella, e tu potrai usare il tasto Modifica ✍️ per inserire il suo Nome e Cognome definitivi.</li>
+              <li>Chiedi al gestore dell’app di creare un account per l’email del collega.</li>
+              <li>Condividi con lui l’indirizzo di SmartShift e le credenziali attraverso un canale sicuro.</li>
+              <li>Il collega può cambiare la password dalla pagina Account.</li>
+              <li>Usa Modifica per completare nome e cognome.</li>
             </ol>
           </div>
           
@@ -412,8 +413,8 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
           <AlertDialogHeader>
             <AlertDialogTitle>Sei sicuro?</AlertDialogTitle>
             <AlertDialogDescription>
-              Stai per eliminare definitivamente l'account di <strong>{userToDelete?.nome} {userToDelete?.cognome}</strong>. 
-              Questa azione cancellerà anche tutti i suoi eventi a calendario (ferie, smartworking, etc) e non può essere annullata.
+              Stai per disattivare il profilo di <strong>{userToDelete?.nome} {userToDelete?.cognome}</strong>.
+              L’utente non potrà più accedere. Le presenze già registrate resteranno archiviate.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

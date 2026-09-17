@@ -1,10 +1,15 @@
+import { requireUser } from '@/lib/auth'
+
+export const dynamic = 'force-dynamic'
+
 import { Navbar } from '@/components/navbar'
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  await requireUser()
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans text-gray-900 dark:bg-[#0B1120] dark:text-gray-100 transition-colors">
       <Navbar />

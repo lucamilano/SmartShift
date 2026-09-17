@@ -1,4 +1,4 @@
-import { createClient } from '@/utils/supabase/server'
+import { getCurrentUser, getRepository } from '@/lib/auth'
 import { NextResponse } from 'next/server'
 import ExcelJS from 'exceljs'
 import { eachDayOfInterval, startOfMonth, endOfMonth, format, isWeekend, getDay } from 'date-fns'
@@ -8,42 +8,24 @@ export const dynamic = 'force-dynamic'
 
 export async function GET(request: Request) {
   const url = new URL(request.url)
-  const month = parseInt(url.searchParams.get('month') || new Date().getMonth().toString())
-  const year = parseInt(url.searchParams.get('year') || new Date().getFullYear().toString())
+  const month = Number(url.searchParams.get('month') || new Date().getMonth().toString())
+  const year = Number(url.searchParams.get('year') || new Date().getFullYear().toString())
 
-  const supabase = await createClient()
-
-  // Controllo Admin
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await getCurrentUser()
   if (!user) return new Response('Unauthorized', { status: 401 })
-
-  const { data: profile } = await supabase
-    .from('profili')
-    .select('ruolo')
-    .eq('id', user.id)
-    .single()
-
-  if (profile?.ruolo !== 'admin') {
-    return new Response('Forbidden', { status: 403 })
+  if (user.ruolo !== 'admin') return new Response('Forbidden', { status: 403 })
+  if (!Number.isInteger(month) || month < 0 || month > 11 || !Number.isInteger(year) || year < 1900 || year > 9999) {
+    return new Response('Mese o anno non valido', { status: 400 })
   }
-
-  // Estrai tutti i colleghi attivi
-  const { data: allUsers } = await supabase
-    .from('profili')
-    .select('id, nome, cognome')
-    .eq('is_active', true)
-    .order('cognome', { ascending: true })
+  const repository = await getRepository()
+  const allUsers = await repository.members()
 
   // Estrai tutti gli eventi del mese (es: dal 2026-02-01 al 2026-02-28)
   const targetDate = new Date(year, month, 1)
   const startStr = format(startOfMonth(targetDate), 'yyyy-MM-dd')
   const endStr = format(endOfMonth(targetDate), 'yyyy-MM-dd')
 
-  const { data: allEvents } = await supabase
-    .from('eventi_calendario')
-    .select('*')
-    .gte('data', startStr)
-    .lte('data', endStr)
+  const allEvents = await repository.teamEvents(startStr, endStr)
 
   // Calcola i giorni del mese tralasciando il weekend
   const daysInMonth = eachDayOfInterval({ start: startOfMonth(targetDate), end: endOfMonth(targetDate) })
@@ -188,8 +170,9 @@ export async function GET(request: Request) {
   const buffer = await workbook.xlsx.writeBuffer()
 
   // Manda in risposta il file forzando il download
-  return new NextResponse(buffer, {
+  return new NextResponse(new Uint8Array(buffer), {
     headers: {
+      'Cache-Control': 'private, no-store',
       'Content-Disposition': `attachment; filename="Presenze_${format(targetDate, 'MM_yyyy')}.xlsx"`,
       'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     }

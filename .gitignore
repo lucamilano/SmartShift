@@ -40,3 +40,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Cloudflare local state and generated Worker
+.open-next/
+.wrangler/
+.dev.vars*
+!.dev.vars.example

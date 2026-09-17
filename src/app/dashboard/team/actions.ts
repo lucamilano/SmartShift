@@ -1,74 +1,31 @@
 'use server'
 
-import { createClient } from '@/utils/supabase/server'
+import { getRepository } from '@/lib/auth'
+import { UserError } from '@/lib/repository'
 import { revalidatePath } from 'next/cache'
 
 export async function updateProfile(userId: string, nome: string, cognome: string, ruolo: string) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: 'Non autorizzato' }
-
-  // Controllo permessi Admin
-  const { data: profile } = await supabase
-    .from('profili')
-    .select('ruolo')
-    .eq('id', user.id)
-    .single()
-
-  if (profile?.ruolo !== 'admin') {
-    return { error: 'Non hai i permessi di Admin' }
+  const repository = await getRepository()
+  try {
+    await repository.updateProfile(userId, nome, cognome, ruolo)
+  } catch (error) {
+    if (error instanceof UserError) return { error: error.message }
+    console.error('Unable to update profile', error)
+    return { error: 'Impossibile salvare il profilo. Riprova.' }
   }
-
-  // Eseguiamo l'aggiornamento
-  const { error } = await supabase
-    .from('profili')
-    .update({ 
-      nome: nome, 
-      cognome: cognome, 
-      ruolo: ruolo 
-    })
-    .eq('id', userId)
-
-  if (error) {
-    return { error: 'Errore durante il salvataggio: ' + error.message }
-  }
-
-  // Ricarica i dati della pagina
-  revalidatePath('/dashboard/team')
+  revalidatePath('/dashboard', 'layout')
   return { success: true }
 }
 
 export async function deleteUserAction(userIdToDelete: string) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: 'Non autorizzato' }
-
-  // Check if admin
-  const { data: profile } = await supabase
-    .from('profili')
-    .select('ruolo')
-    .eq('id', user.id)
-    .single()
-
-  if (profile?.ruolo !== 'admin') {
-    return { error: 'Non hai i permessi di Admin' }
+  const repository = await getRepository()
+  try {
+    await repository.deactivateProfile(userIdToDelete)
+  } catch (error) {
+    if (error instanceof UserError) return { error: error.message }
+    console.error('Unable to deactivate profile', error)
+    return { error: 'Impossibile disattivare il profilo. Riprova.' }
   }
-
-  // Prevent self deletion
-  if (user.id === userIdToDelete) {
-    return { error: 'Non puoi cancellare il tuo stesso account.' }
-  }
-
-  // Eseguiamo un SOFT DELETE oscurando il profilo anziché cancellarlo
-  const { error } = await supabase
-    .from('profili')
-    .update({ is_active: false })
-    .eq('id', userIdToDelete)
-
-  if (error) {
-    return { error: 'Errore durante la disattivazione dell\'utente: ' + error.message }
-  }
-
-  revalidatePath('/dashboard/team')
+  revalidatePath('/dashboard', 'layout')
   return { success: true }
 }

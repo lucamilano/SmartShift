@@ -1,25 +1,11 @@
-import { createClient } from '@/utils/supabase/server'
-import { redirect } from 'next/navigation'
+import { requireUser } from '@/lib/auth'
 import { CalendarPlus, CalendarDays, FileDown, ShieldAlert } from 'lucide-react'
 import Link from 'next/link'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 
 export default async function DashboardPage() {
-  const supabase = await createClient()
-  
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    redirect('/login')
-  }
-
-  // Leggiamo i dati extra dal database
-  const { data: profile } = await supabase
-    .from('profili')
-    .select('nome, cognome, ruolo')
-    .eq('id', user.id)
-    .single()
+  const profile = await requireUser()
 
   const isAdmin = profile?.ruolo === 'admin'
 
@@ -106,7 +92,7 @@ export default async function DashboardPage() {
                 </p>
                 <Button asChild variant="secondary" className="w-full bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 hover:bg-purple-200 dark:hover:bg-purple-900/70">
                   <Link href="/dashboard/esporta">
-                    Vai all'esportazione
+                    Vai all’esportazione
                   </Link>
                 </Button>
               </CardContent>
