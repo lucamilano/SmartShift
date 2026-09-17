@@ -20,7 +20,6 @@ export async function Navbar() {
           {/* Logo e Link Principali (A sinistra) */}
           <div className="flex items-center gap-6">
             <Link href="/dashboard" className="flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               <span className="text-lg font-semibold tracking-tight">SmartShift</span>
             </Link>
             

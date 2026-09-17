@@ -2,10 +2,9 @@
 
 import { useState } from 'react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { UserPlus, FileEdit, CalendarDays, Mail, Trash2 } from 'lucide-react'
+import { FileEdit, CalendarDays, Mail, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
@@ -152,7 +151,7 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
           </p>
         </div>
         <Button onClick={() => setIsNewUserModalOpen(true)}>
-          <UserPlus className="h-4 w-4" /> Nuovo collega
+          Nuovo collega
         </Button>
       </header>
 
@@ -179,14 +178,14 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
           <div className="md:hidden flex flex-col divide-y divide-gray-100 dark:divide-slate-800">
             {members.map((member) => {
               const todayStatus = todaysEvents.find(e => e.utente_id === member.id)
-              let statusBadge = <Badge variant="outline" className="text-muted-foreground">Nessun evento</Badge>
+              let statusLabel = <span className="text-sm text-muted-foreground">Nessun evento</span>
               
               if (todayStatus) {
                 switch(todayStatus.tipo) {
-                  case 'ufficio': statusBadge = <Badge variant="outline" className="text-green-700 dark:text-green-400">Ufficio</Badge>; break;
-                  case 'smartworking': statusBadge = <Badge variant="outline" className="text-blue-700 dark:text-blue-400">Smartworking</Badge>; break;
-                  case 'ferie': statusBadge = <Badge variant="outline" className="text-yellow-700 dark:text-yellow-400">Ferie</Badge>; break;
-                  case 'malattia': statusBadge = <Badge variant="outline" className="text-red-700 dark:text-red-400">Malattia</Badge>; break;
+                  case 'ufficio': statusLabel = <span className="text-sm font-medium text-green-700 dark:text-green-400">Ufficio</span>; break;
+                  case 'smartworking': statusLabel = <span className="text-sm font-medium text-blue-700 dark:text-blue-400">Smartworking</span>; break;
+                  case 'ferie': statusLabel = <span className="text-sm font-medium text-yellow-700 dark:text-yellow-400">Ferie</span>; break;
+                  case 'malattia': statusLabel = <span className="text-sm font-medium text-red-700 dark:text-red-400">Malattia</span>; break;
                 }
               }
 
@@ -207,14 +206,14 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
                             : <span>Utente</span>
                           }
                         </div>
-                        {member.must_change_password && <Badge variant="outline" className="mt-1 text-amber-700 border-amber-300">Primo accesso in attesa</Badge>}
+                        {member.must_change_password && <p className="mt-1 text-xs font-medium text-amber-700 dark:text-amber-400">Primo accesso in attesa</p>}
                       </div>
                     </div>
                   </div>
                   
                   <div className="flex justify-between items-center py-1">
                     <span className="text-xs text-gray-500 dark:text-slate-400 font-medium">Stato Oggi:</span>
-                    <div>{statusBadge}</div>
+                    <div>{statusLabel}</div>
                   </div>
                   
                   <div className="flex justify-end gap-2 mt-1 border-t border-gray-50 dark:border-slate-800/50 pt-3">
@@ -251,7 +250,7 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
           {/* Visualizzazione Desktop (Tabella Classica) */}
           <div className="hidden md:block overflow-x-auto">
             <Table>
-            <TableHeader className="bg-muted/30">
+            <TableHeader>
               <TableRow className="dark:border-slate-800">
                 <TableHead className="w-[200px] pl-6 dark:text-slate-400">Collega</TableHead>
                 <TableHead className="dark:text-slate-400">Ruolo</TableHead>
@@ -262,19 +261,19 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
             <TableBody>
               {members.map((member) => {
                 const todayStatus = todaysEvents.find(e => e.utente_id === member.id)
-                let statusBadge = <Badge variant="outline" className="text-muted-foreground">Nessun evento</Badge>
+                let statusLabel = <span className="text-sm text-muted-foreground">Nessun evento</span>
                 
                 if (todayStatus) {
                   switch(todayStatus.tipo) {
-                    case 'ufficio': statusBadge = <Badge variant="outline" className="text-green-700 dark:text-green-400">Ufficio</Badge>; break;
-                    case 'smartworking': statusBadge = <Badge variant="outline" className="text-blue-700 dark:text-blue-400">Smartworking</Badge>; break;
-                    case 'ferie': statusBadge = <Badge variant="outline" className="text-yellow-700 dark:text-yellow-400">Ferie</Badge>; break;
-                    case 'malattia': statusBadge = <Badge variant="outline" className="text-red-700 dark:text-red-400">Malattia</Badge>; break;
+                    case 'ufficio': statusLabel = <span className="text-sm font-medium text-green-700 dark:text-green-400">Ufficio</span>; break;
+                    case 'smartworking': statusLabel = <span className="text-sm font-medium text-blue-700 dark:text-blue-400">Smartworking</span>; break;
+                    case 'ferie': statusLabel = <span className="text-sm font-medium text-yellow-700 dark:text-yellow-400">Ferie</span>; break;
+                    case 'malattia': statusLabel = <span className="text-sm font-medium text-red-700 dark:text-red-400">Malattia</span>; break;
                   }
                 }
 
                 return (
-                  <TableRow key={member.id} className="hover:bg-gray-50/50 dark:hover:bg-slate-800/50 dark:border-slate-800">
+                  <TableRow key={member.id} className="dark:border-slate-800">
                     <TableCell className="pl-6 font-medium dark:text-white">
                       <div className="flex items-center gap-3">
                         <Avatar className="h-9 w-9">
@@ -290,9 +289,9 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
                         ? <span className="text-sm font-medium text-blue-700 dark:text-blue-400">Amministratore</span>
                         : <span className="text-sm text-muted-foreground">Utente</span>
                       }
-                      {member.must_change_password && <Badge variant="outline" className="ml-2 text-amber-700 border-amber-300">Invito {member.invitation_status === 'failed' ? 'non inviato' : 'in attesa'}</Badge>}
+                      {member.must_change_password && <span className="ml-2 text-xs font-medium text-amber-700 dark:text-amber-400">Invito {member.invitation_status === 'failed' ? 'non inviato' : 'in attesa'}</span>}
                     </TableCell>
-                    <TableCell>{statusBadge}</TableCell>
+                    <TableCell>{statusLabel}</TableCell>
                     <TableCell className="text-right pr-6">
                       <div className="flex justify-end gap-2">
                         <Button variant="outline" size="sm" asChild className="h-8 text-xs text-gray-600 dark:text-slate-300 border-gray-300 dark:border-slate-700 dark:hover:bg-slate-800">

@@ -295,12 +295,12 @@ export default function CalendarClient({
                   </div>
                 ) : holidayName ? (
                   // Marker Festività
-                  <div className="absolute inset-x-1 bottom-1 flex items-center justify-center p-1 text-center text-xs leading-tight font-medium text-red-700 dark:text-red-400 md:group-hover:opacity-0 transition-opacity">
+                  <div className="absolute inset-x-1 bottom-1 flex items-center justify-center p-1 text-center text-xs leading-tight font-medium text-red-700 dark:text-red-400">
                     {holidayName}
                   </div>
                 ) : weekend && !holidayName ? (
                   // Marker Weekend
-                  <div className="absolute inset-x-1 bottom-1 flex items-center justify-center p-1 text-center text-xs leading-tight text-muted-foreground md:group-hover:opacity-0 transition-opacity">
+                  <div className="absolute inset-x-1 bottom-1 flex items-center justify-center p-1 text-center text-xs leading-tight text-muted-foreground">
                     {getDay(day) === 6 ? 'Sab' : 'Dom'}
                   </div>
                 ) : null}

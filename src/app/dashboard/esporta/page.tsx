@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
@@ -39,14 +38,12 @@ export default function ExportPage() {
         </p>
       </header>
 
-      <Card>
-        <CardHeader className="border-b">
-          <CardTitle className="text-lg">Periodo di esportazione</CardTitle>
-          <CardDescription>
+      <section className="border-y py-5" aria-labelledby="period-title">
+          <h2 id="period-title" className="text-lg font-semibold">Periodo di esportazione</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
             Il file Excel includerà i giorni lavorativi dal lunedì al venerdì.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
+          </p>
+        <div className="mt-5 space-y-6">
           
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
             <div className="space-y-3">
@@ -91,8 +88,8 @@ export default function ExportPage() {
             </Button>
           </div>
           
-        </CardContent>
-      </Card>
+        </div>
+      </section>
       
       <section className="border-t pt-5" aria-labelledby="legend-title">
         <h2 id="legend-title" className="text-sm font-medium">
