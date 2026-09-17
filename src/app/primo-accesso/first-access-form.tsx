@@ -13,7 +13,7 @@ export default function FirstAccessForm({ email, expired }: { email: string; exp
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState('')
   async function logout() { await authClient.signOut(); router.replace('/login'); router.refresh() }
-  return <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-[#0B1120] p-4">
+  return <div className="flex min-h-screen items-center justify-center bg-background p-4">
     <Card className="w-full max-w-md">
       <CardHeader>
         <CardTitle>Completa il primo accesso</CardTitle>

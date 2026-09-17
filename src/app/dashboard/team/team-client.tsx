@@ -1,12 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { Users, UserPlus, FileEdit, CalendarDays, Mail, Trash2 } from 'lucide-react'
+import { UserPlus, FileEdit, CalendarDays, Mail, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
@@ -140,76 +139,54 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
   }
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="max-w-6xl mx-auto space-y-7">
       
       {/* Intestazione */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white dark:bg-[#111827] p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 mb-8 gap-4 transition-colors">
+      <header className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white flex items-center">
-            <Users className="mr-3 text-blue-600 dark:text-blue-500 h-8 w-8" />
-            Gestione Team
+          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+            Gestione team
           </h1>
-          <p className="text-gray-500 dark:text-slate-400 mt-2 text-lg">
-            Monitora le presenze di oggi, gestisci l’anagrafica e inserisci turni per conto degli altri.
+          <p className="mt-2 max-w-2xl text-sm text-muted-foreground sm:text-base">
+            Presenze di oggi e anagrafica dei colleghi.
           </p>
         </div>
-        <Button onClick={() => setIsNewUserModalOpen(true)} className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 dark:text-white">
-          <UserPlus className="h-4 w-4 mr-2" /> Nuovo Collega
+        <Button onClick={() => setIsNewUserModalOpen(true)}>
+          <UserPlus className="h-4 w-4" /> Nuovo collega
         </Button>
-      </div>
+      </header>
 
       {/* Panoramica di Oggi */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 md:gap-4">
-        <Card className="border-l-4 border-l-green-500 dark:bg-[#111827] dark:border-y-slate-800 dark:border-r-slate-800 rounded-xl shadow-sm">
-          <CardContent className="p-4 flex flex-col justify-center items-center text-center">
-            <span className="text-3xl font-bold text-green-700 dark:text-green-400">{stats.ufficio}</span>
-            <span className="text-xs uppercase font-medium text-gray-500 dark:text-slate-400 mt-1">In Ufficio</span>
-          </CardContent>
-        </Card>
-        <Card className="border-l-4 border-l-blue-500 dark:bg-[#111827] dark:border-y-slate-800 dark:border-r-slate-800 rounded-xl shadow-sm">
-          <CardContent className="p-4 flex flex-col justify-center items-center text-center">
-            <span className="text-3xl font-bold text-blue-700 dark:text-blue-400">{stats.smartworking}</span>
-            <span className="text-xs uppercase font-medium text-gray-500 dark:text-slate-400 mt-1">Smartworking</span>
-          </CardContent>
-        </Card>
-        <Card className="border-l-4 border-l-yellow-400 dark:bg-[#111827] dark:border-y-slate-800 dark:border-r-slate-800 rounded-xl shadow-sm">
-          <CardContent className="p-4 flex flex-col justify-center items-center text-center">
-            <span className="text-3xl font-bold text-yellow-600 dark:text-yellow-400">{stats.ferie}</span>
-            <span className="text-xs uppercase font-medium text-gray-500 dark:text-slate-400 mt-1">In Ferie</span>
-          </CardContent>
-        </Card>
-        <Card className="border-l-4 border-l-red-500 dark:bg-[#111827] dark:border-y-slate-800 dark:border-r-slate-800 rounded-xl shadow-sm">
-          <CardContent className="p-4 flex flex-col justify-center items-center text-center">
-            <span className="text-3xl font-bold text-red-600 dark:text-red-400">{stats.malattia}</span>
-            <span className="text-xs uppercase font-medium text-gray-500 dark:text-slate-400 mt-1">In Malattia</span>
-          </CardContent>
-        </Card>
-        <Card className="border-l-4 border-l-gray-300 dark:border-l-slate-600 rounded-xl shadow-sm bg-gray-50 dark:bg-[#111827] dark:border-y-slate-800 dark:border-r-slate-800">
-          <CardContent className="p-4 flex flex-col justify-center items-center text-center">
-            <span className="text-3xl font-bold text-gray-600 dark:text-slate-300">{stats.assenti_non_giustificati}</span>
-            <span className="text-xs uppercase font-medium text-gray-400 dark:text-slate-500 mt-1">Nessun Turno</span>
-          </CardContent>
-        </Card>
-      </div>
+      <section aria-labelledby="today-title">
+        <h2 id="today-title" className="text-sm font-medium text-muted-foreground">Situazione di oggi</h2>
+        <dl className="mt-3 grid grid-cols-2 border-y sm:grid-cols-3 md:grid-cols-5 md:divide-x">
+          <div className="py-3 md:px-4 md:first:pl-0"><dt className="text-sm text-muted-foreground">In ufficio</dt><dd className="mt-1 text-2xl font-semibold tabular-nums">{stats.ufficio}</dd></div>
+          <div className="py-3 md:px-4"><dt className="text-sm text-muted-foreground">Smartworking</dt><dd className="mt-1 text-2xl font-semibold tabular-nums">{stats.smartworking}</dd></div>
+          <div className="py-3 md:px-4"><dt className="text-sm text-muted-foreground">Ferie</dt><dd className="mt-1 text-2xl font-semibold tabular-nums">{stats.ferie}</dd></div>
+          <div className="py-3 md:px-4"><dt className="text-sm text-muted-foreground">Malattia</dt><dd className="mt-1 text-2xl font-semibold tabular-nums">{stats.malattia}</dd></div>
+          <div className="py-3 md:px-4"><dt className="text-sm text-muted-foreground">Non pianificati</dt><dd className="mt-1 text-2xl font-semibold tabular-nums">{stats.assenti_non_giustificati}</dd></div>
+        </dl>
+      </section>
 
       {/* Tabella Colleghi */}
-      <Card className="shadow-sm border-gray-200 dark:border-slate-800 dark:bg-[#111827]">
-        <CardHeader className="bg-gray-50/50 dark:bg-[#111827] border-b dark:border-slate-800">
-          <CardTitle className="text-xl dark:text-white">Anagrafica Dipendenti <span className="ml-2 text-sm font-normal text-gray-500 dark:text-slate-400 bg-gray-200 dark:bg-slate-800 px-2 py-0.5 rounded-full">{members.length}</span></CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
+      <section className="border-y" aria-labelledby="members-title">
+        <div className="flex items-baseline gap-2 border-b py-4">
+          <h2 id="members-title" className="text-lg font-semibold">Colleghi</h2>
+          <span className="text-sm text-muted-foreground">{members.length}</span>
+        </div>
+        <div>
           {/* Visualizzazione Mobile (Lista a schede compatte) */}
           <div className="md:hidden flex flex-col divide-y divide-gray-100 dark:divide-slate-800">
             {members.map((member) => {
               const todayStatus = todaysEvents.find(e => e.utente_id === member.id)
-              let statusBadge = <Badge variant="outline" className="text-gray-400 dark:text-slate-400 border-gray-200 dark:border-slate-700">Nessun Evento</Badge>
+              let statusBadge = <Badge variant="outline" className="text-muted-foreground">Nessun evento</Badge>
               
               if (todayStatus) {
                 switch(todayStatus.tipo) {
-                  case 'ufficio': statusBadge = <Badge className="bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 border-0">🏢 Ufficio</Badge>; break;
-                  case 'smartworking': statusBadge = <Badge className="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 border-0">🏠 Smartworking</Badge>; break;
-                  case 'ferie': statusBadge = <Badge className="bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 border-0">🌴 Ferie</Badge>; break;
-                  case 'malattia': statusBadge = <Badge className="bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 border-0">🤒 Malattia</Badge>; break;
+                  case 'ufficio': statusBadge = <Badge variant="outline" className="text-green-700 dark:text-green-400">Ufficio</Badge>; break;
+                  case 'smartworking': statusBadge = <Badge variant="outline" className="text-blue-700 dark:text-blue-400">Smartworking</Badge>; break;
+                  case 'ferie': statusBadge = <Badge variant="outline" className="text-yellow-700 dark:text-yellow-400">Ferie</Badge>; break;
+                  case 'malattia': statusBadge = <Badge variant="outline" className="text-red-700 dark:text-red-400">Malattia</Badge>; break;
                 }
               }
 
@@ -226,8 +203,8 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
                         <div className="font-semibold text-gray-900 dark:text-white">{[member.nome, member.cognome].filter(Boolean).join(' ') || member.email}</div>
                         <div className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">
                           {member.ruolo === 'admin' 
-                            ? <span className="font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-1.5 py-0.5 rounded-sm uppercase tracking-wider">Admin</span>
-                            : <span className="uppercase tracking-wider">Utente</span>
+                            ? <span className="font-medium text-blue-700 dark:text-blue-400">Amministratore</span>
+                            : <span>Utente</span>
                           }
                         </div>
                         {member.must_change_password && <Badge variant="outline" className="mt-1 text-amber-700 border-amber-300">Primo accesso in attesa</Badge>}
@@ -250,16 +227,18 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
                       variant="ghost" 
                       size="icon" 
                       onClick={() => handleEditClick(member)}
-                      className="h-8 w-8 text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 shrink-0" 
+                      className="h-8 w-8 text-blue-700 dark:text-blue-400 shrink-0"
+                      aria-label="Modifica dati anagrafici"
                     >
                       <FileEdit className="h-4 w-4" />
                     </Button>
-                    {member.must_change_password && <Button variant="ghost" size="icon" disabled={loading} onClick={() => handleResendInvitation(member)} title="Reinvia invito" className="h-8 w-8 text-amber-700 bg-amber-50 hover:bg-amber-100 shrink-0"><Mail className="h-4 w-4" /></Button>}
+                    {member.must_change_password && <Button variant="ghost" size="icon" disabled={loading} onClick={() => handleResendInvitation(member)} title="Reinvia invito" aria-label="Reinvia invito" className="h-8 w-8 text-amber-700 shrink-0"><Mail className="h-4 w-4" /></Button>}
                     <Button 
                       variant="ghost" 
                       size="icon" 
                       onClick={() => handleDeleteClick(member)}
-                      className="h-8 w-8 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 shrink-0" 
+                      className="h-8 w-8 text-red-600 dark:text-red-400 shrink-0"
+                      aria-label="Rimuovi account"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -272,7 +251,7 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
           {/* Visualizzazione Desktop (Tabella Classica) */}
           <div className="hidden md:block overflow-x-auto">
             <Table>
-            <TableHeader className="bg-gray-50 dark:bg-[#111827]">
+            <TableHeader className="bg-muted/30">
               <TableRow className="dark:border-slate-800">
                 <TableHead className="w-[200px] pl-6 dark:text-slate-400">Collega</TableHead>
                 <TableHead className="dark:text-slate-400">Ruolo</TableHead>
@@ -283,14 +262,14 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
             <TableBody>
               {members.map((member) => {
                 const todayStatus = todaysEvents.find(e => e.utente_id === member.id)
-                let statusBadge = <Badge variant="outline" className="text-gray-400 dark:text-slate-400 border-gray-200 dark:border-slate-700">Nessun Evento</Badge>
+                let statusBadge = <Badge variant="outline" className="text-muted-foreground">Nessun evento</Badge>
                 
                 if (todayStatus) {
                   switch(todayStatus.tipo) {
-                    case 'ufficio': statusBadge = <Badge className="bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/50 border-0">🏢 Ufficio</Badge>; break;
-                    case 'smartworking': statusBadge = <Badge className="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50 border-0">🏠 Smartworking</Badge>; break;
-                    case 'ferie': statusBadge = <Badge className="bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 hover:bg-yellow-100 dark:hover:bg-yellow-900/50 border-0">🌴 Ferie</Badge>; break;
-                    case 'malattia': statusBadge = <Badge className="bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/50 border-0">🤒 Malattia</Badge>; break;
+                    case 'ufficio': statusBadge = <Badge variant="outline" className="text-green-700 dark:text-green-400">Ufficio</Badge>; break;
+                    case 'smartworking': statusBadge = <Badge variant="outline" className="text-blue-700 dark:text-blue-400">Smartworking</Badge>; break;
+                    case 'ferie': statusBadge = <Badge variant="outline" className="text-yellow-700 dark:text-yellow-400">Ferie</Badge>; break;
+                    case 'malattia': statusBadge = <Badge variant="outline" className="text-red-700 dark:text-red-400">Malattia</Badge>; break;
                   }
                 }
 
@@ -308,8 +287,8 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
                     </TableCell>
                     <TableCell>
                       {member.ruolo === 'admin' 
-                        ? <span className="text-xs uppercase font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded-md">Admin</span>
-                        : <span className="text-xs uppercase font-semibold text-gray-500 dark:text-slate-400">Utente</span>
+                        ? <span className="text-sm font-medium text-blue-700 dark:text-blue-400">Amministratore</span>
+                        : <span className="text-sm text-muted-foreground">Utente</span>
                       }
                       {member.must_change_password && <Badge variant="outline" className="ml-2 text-amber-700 border-amber-300">Invito {member.invitation_status === 'failed' ? 'non inviato' : 'in attesa'}</Badge>}
                     </TableCell>
@@ -327,16 +306,18 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
                           onClick={() => handleEditClick(member)}
                           className="h-8 w-8 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:bg-blue-900/50 hover:bg-blue-50" 
                           title="Modifica dati anagrafici"
+                          aria-label="Modifica dati anagrafici"
                         >
                           <FileEdit className="h-4 w-4" />
                         </Button>
-                        {member.must_change_password && <Button variant="ghost" size="icon" disabled={loading} onClick={() => handleResendInvitation(member)} title="Genera una nuova password temporanea e reinvia" className="h-8 w-8 text-amber-700 hover:bg-amber-50"><Mail className="h-4 w-4" /></Button>}
+                        {member.must_change_password && <Button variant="ghost" size="icon" disabled={loading} onClick={() => handleResendInvitation(member)} title="Genera una nuova password temporanea e reinvia" aria-label="Reinvia invito" className="h-8 w-8 text-amber-700 hover:bg-amber-50"><Mail className="h-4 w-4" /></Button>}
                         <Button 
                           variant="ghost" 
                           size="icon" 
                           onClick={() => handleDeleteClick(member)}
                           className="h-8 w-8 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:bg-red-900/50 hover:bg-red-50" 
                           title="Rimuovi account"
+                          aria-label="Rimuovi account"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -348,21 +329,21 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
             </TableBody>
           </Table>
         </div>
-        </CardContent>
-      </Card>
+        </div>
+      </section>
 
       {/* --- Modale di Modifica Dati --- */}
       <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-xl">Modifica Anagrafica</DialogTitle>
+            <DialogTitle className="text-xl">Modifica anagrafica</DialogTitle>
             <DialogDescription>
               Modifica i dati di questo collega. Per cambiare l’email, contatta il supporto.
             </DialogDescription>
           </DialogHeader>
           
           <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="nome" className="text-sm font-semibold">Nome</Label>
                 <Input id="nome" value={editNome} onChange={(e) => setEditNome(e.target.value)} />
@@ -389,8 +370,8 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
           
           <DialogFooter>
             <Button variant="ghost" onClick={() => setIsEditModalOpen(false)}>Annulla</Button>
-            <Button onClick={handleSaveEdit} disabled={loading} className="bg-blue-600 hover:bg-blue-700">
-              {loading ? 'Salvataggio...' : 'Salva Modifiche'}
+            <Button onClick={handleSaveEdit} disabled={loading}>
+              {loading ? 'Salvataggio...' : 'Salva modifiche'}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -400,14 +381,13 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
       <Dialog open={isNewUserModalOpen} onOpenChange={setIsNewUserModalOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-xl flex items-center">
-              <UserPlus className="h-5 w-5 mr-2 text-blue-600" />
+            <DialogTitle className="text-xl">
               Aggiungi nuovo dipendente
             </DialogTitle>
             <DialogDescription>Il nuovo account sarà un utente base e riceverà una password temporanea valida 24 ore.</DialogDescription>
           </DialogHeader>
           <div className="py-4 space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-2"><Label htmlFor="newNome">Nome</Label><Input id="newNome" value={newNome} onChange={event => setNewNome(event.target.value)} required maxLength={100} /></div>
               <div className="space-y-2"><Label htmlFor="newCognome">Cognome</Label><Input id="newCognome" value={newCognome} onChange={event => setNewCognome(event.target.value)} required maxLength={100} /></div>
             </div>
@@ -425,7 +405,7 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
       <AlertDialog open={alertOpen} onOpenChange={open => { setAlertOpen(open); if (!open) setTemporaryPassword(null) }}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Attenzione</AlertDialogTitle>
+            <AlertDialogTitle>Esito dell’operazione</AlertDialogTitle>
             <AlertDialogDescription>
               <p>{alertMessage}</p>
               {temporaryPassword && <div className="mt-4 rounded-md border border-amber-300 bg-amber-50 p-3 text-amber-950 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-100">
@@ -437,7 +417,7 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
           </AlertDialogHeader>
           <AlertDialogFooter>
             {temporaryPassword && <Button type="button" variant="outline" onClick={() => navigator.clipboard.writeText(temporaryPassword)}>Copia password</Button>}
-            <AlertDialogAction className="bg-blue-600 hover:bg-blue-700">Ho Capito</AlertDialogAction>
+            <AlertDialogAction>Ho capito</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -454,7 +434,7 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={loading}>Annulla</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmDelete} disabled={loading} className="bg-red-600 hover:bg-red-700">
+            <AlertDialogAction onClick={handleConfirmDelete} disabled={loading} variant="destructive">
               {loading ? 'Rimozione in corso...' : 'Sì, rimuovi utente'}
             </AlertDialogAction>
           </AlertDialogFooter>

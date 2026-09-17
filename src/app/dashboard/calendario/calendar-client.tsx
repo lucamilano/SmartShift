@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { startOfMonth, endOfMonth, eachDayOfInterval, format, isToday, addMonths, subMonths, getDay, isWeekend } from 'date-fns'
 import { it } from 'date-fns/locale'
 import { getItalianHoliday } from '@/utils/holidays'
-import { ChevronLeft, ChevronRight, Plus, Trash2, Users } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Trash2, Users } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { addEvent, deleteEvent, getUserEvents, getOthersHolidays } from './actions'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog'
@@ -35,10 +35,10 @@ type OtherHoliday = {
 }
 
 const TYPE_COLORS: Record<string, string> = {
-  'smartworking': 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 border-blue-200 dark:border-blue-800 hover:bg-blue-200 dark:hover:bg-blue-900/50',
-  'ferie': 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 border-red-200 dark:border-red-800 hover:bg-red-200 dark:hover:bg-red-900/50',
-  'malattia': 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300 border-orange-200 dark:border-orange-800 hover:bg-orange-200 dark:hover:bg-orange-900/50',
-  'ufficio': 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 border-green-200 dark:border-green-800 hover:bg-green-200 dark:hover:bg-green-900/50',
+  'smartworking': 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 border-blue-200 dark:border-blue-800',
+  'ferie': 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-900 dark:text-yellow-200 border-yellow-300 dark:border-yellow-800',
+  'malattia': 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 border-red-200 dark:border-red-800',
+  'ufficio': 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 border-green-200 dark:border-green-800',
 }
 
 const TYPE_LABELS: Record<string, string> = {
@@ -187,37 +187,37 @@ export default function CalendarClient({
   }
 
   return (
-    <div className="bg-white dark:bg-[#111827] rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 overflow-hidden transition-colors">
+    <section className="border bg-card overflow-hidden" aria-label="Calendario mensile">
       
       {targetUserName && (
-        <div className="bg-amber-50 dark:bg-amber-950/30 px-6 py-3 border-b border-amber-200 dark:border-amber-900 text-amber-800 dark:text-amber-300 font-medium flex items-center">
-          <span className="mr-2">⚠️</span> Stai modificando il calendario per conto di: <strong className="ml-1 text-amber-900 dark:text-amber-100">{targetUserName}</strong>
+        <div className="bg-amber-50 dark:bg-amber-950/30 px-4 py-3 border-b border-amber-200 dark:border-amber-900 text-sm text-amber-900 dark:text-amber-200">
+          Stai modificando il calendario di <strong>{targetUserName}</strong>.
         </div>
       )}
 
       {/* Intestazione Mese */}
-      <div className="flex items-center justify-between p-6 border-b dark:border-slate-800">
-        <h2 className="text-2xl font-bold capitalize text-gray-900 dark:text-white">
+      <div className="flex items-center justify-between p-4 border-b sm:px-5">
+        <h2 className="text-xl font-semibold capitalize">
           {format(currentMonth, 'MMMM yyyy', { locale: it })}
         </h2>
         <div className="flex gap-2">
-          <Button variant="outline" size="icon" onClick={prevMonth} className="h-10 w-10 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">
+          <Button variant="outline" size="icon" onClick={prevMonth} aria-label="Mese precedente" className="h-10 w-10 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">
             <ChevronLeft className="h-5 w-5" />
           </Button>
-          <Button variant="outline" size="icon" onClick={nextMonth} className="h-10 w-10 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">
+          <Button variant="outline" size="icon" onClick={nextMonth} aria-label="Mese successivo" className="h-10 w-10 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">
             <ChevronRight className="h-5 w-5" />
           </Button>
         </div>
       </div>
 
-      <div className="p-3 sm:p-6">
+      <div className="p-2 sm:p-4">
         {/* Nomi dei giorni della settimana */}
-        <div className="grid grid-cols-7 gap-1 sm:gap-2 md:gap-4 mb-2 md:mb-4">
+        <div className="grid grid-cols-7 gap-1 mb-2 sm:gap-2">
           {[
             { short: 'L', full: 'Lun' }, { short: 'M', full: 'Mar' }, { short: 'M', full: 'Mer' }, 
             { short: 'G', full: 'Gio' }, { short: 'V', full: 'Ven' }, { short: 'S', full: 'Sab' }, { short: 'D', full: 'Dom' }
           ].map((day, i) => (
-            <div key={i} className="text-center font-bold text-gray-400 text-[10px] sm:text-xs uppercase tracking-wider">
+            <div key={i} className="text-center text-xs font-medium text-muted-foreground">
               <span className="md:hidden">{day.short}</span>
               <span className="hidden md:inline">{day.full}</span>
             </div>
@@ -225,11 +225,11 @@ export default function CalendarClient({
         </div>
 
         {/* Griglia giorni del mese */}
-        <div className="grid grid-cols-7 gap-1 sm:gap-2 md:gap-4">
+        <div className="grid grid-cols-7 gap-1 sm:gap-2">
           
           {/* Spazi vuoti di padding iniziale */}
           {Array.from({ length: paddingDays }).map((_, i) => (
-            <div key={`pad-${i}`} className="min-h-[90px] md:h-28 bg-gray-50/50 dark:bg-[#111827]/50 rounded-lg md:rounded-xl border border-dashed border-gray-200 dark:border-slate-800"></div>
+            <div key={`pad-${i}`} className="min-h-20 bg-muted/20 sm:min-h-24"></div>
           ))}
 
           {/* Giorni Reali */}
@@ -245,12 +245,21 @@ export default function CalendarClient({
               <div 
                 key={day.toString()} 
                 onClick={() => handleDayClick(day)}
+                onKeyDown={(event) => {
+                  if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) {
+                    event.preventDefault()
+                    handleDayClick(day)
+                  }
+                }}
+                role="button"
+                tabIndex={0}
+                aria-label={`${format(day, 'd MMMM yyyy', { locale: it })}${dayEvent ? `, ${TYPE_LABELS[dayEvent.tipo] || dayEvent.tipo}` : ''}`}
                 className={`
-                  min-h-[90px] md:h-28 p-1 sm:p-2 md:p-3 rounded-lg md:rounded-xl border transition-all relative flex flex-col group cursor-pointer overflow-hidden
-                  ${today ? 'border-blue-400 dark:border-blue-600 bg-blue-50/20 dark:bg-blue-900/10 shadow-sm' 
+                  min-h-20 sm:min-h-24 p-1.5 sm:p-2 rounded-sm border transition-colors relative flex flex-col group cursor-pointer overflow-hidden
+                  ${today ? 'border-blue-500 bg-blue-50/30 dark:bg-blue-950/20'
                     : holidayName && !dayEvent ? 'border-red-200 dark:border-red-900/50 bg-red-50/30 dark:bg-red-900/20' 
                     : weekend && !dayEvent ? 'border-gray-300 dark:border-slate-700 bg-gray-100/60 dark:bg-slate-800/40' 
-                    : 'border-gray-200 dark:border-slate-800 bg-white dark:bg-[#111827] hover:border-gray-300 dark:hover:border-slate-600 hover:shadow-sm'}
+                    : 'border-border bg-background hover:border-gray-400 dark:hover:border-slate-600'}
                 `}
               >
                 {/* Etichetta del Giorno */}
@@ -264,33 +273,34 @@ export default function CalendarClient({
                 {/* Contenuto del Giorno: L'Evento */}
                 {dayEvent ? (
                   <div className={`
-                    mt-auto p-1.5 md:p-2 rounded-md md:rounded-lg border flex flex-col relative
+                    mt-auto p-1.5 rounded-sm border flex flex-col relative
                     ${TYPE_COLORS[dayEvent.tipo] || 'bg-gray-100'}
                   `}>
-                    <span className="text-[10px] md:text-xs font-bold leading-none md:leading-tight truncate">
+                    <span className="text-xs font-semibold leading-tight truncate">
                       {TYPE_LABELS[dayEvent.tipo] || dayEvent.tipo}
                     </span>
                     {dayEvent.mezza_giornata && (
-                      <span className="text-[8px] md:text-[10px] uppercase font-bold opacity-70 mt-0.5">Mezza G.</span>
+                      <span className="text-xs opacity-70 mt-0.5">Mezza giornata</span>
                     )}
 
                     {/* Bottone Cancella (Appare solo quando passi col mouse) */}
                     <button 
                       onClick={(e) => handleDelete(dayEvent.id, e)}
-                      className="absolute -top-1.5 -right-1.5 md:-top-2 md:-right-2 bg-white dark:bg-slate-800 rounded-full p-1 border dark:border-slate-700 shadow-sm text-red-500 dark:text-red-400 md:opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50 dark:hover:bg-red-900/50"
+                      className="absolute -top-1.5 -right-1.5 bg-background rounded-sm p-1 border text-red-600 dark:text-red-400 md:opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50 dark:hover:bg-red-950"
                       title="Rimuovi"
+                      aria-label={`Rimuovi ${TYPE_LABELS[dayEvent.tipo] || dayEvent.tipo} del ${format(day, 'd MMMM yyyy', { locale: it })}`}
                     >
                       <Trash2 className="h-3 w-3" />
                     </button>
                   </div>
                 ) : holidayName ? (
                   // Marker Festività
-                  <div className="absolute inset-x-1 sm:inset-x-2 bottom-1.5 md:bottom-3 flex items-center justify-center p-1 md:p-2 text-center text-[8px] md:text-[10px] leading-tight font-bold text-red-600 dark:text-red-400 bg-red-100/60 dark:bg-red-900/30 rounded-lg md:group-hover:opacity-0 transition-opacity">
-                    <span className="hidden sm:inline">🎉</span> {holidayName}
+                  <div className="absolute inset-x-1 bottom-1 flex items-center justify-center p-1 text-center text-xs leading-tight font-medium text-red-700 dark:text-red-400 md:group-hover:opacity-0 transition-opacity">
+                    {holidayName}
                   </div>
                 ) : weekend && !holidayName ? (
                   // Marker Weekend
-                  <div className="absolute inset-x-1 sm:inset-x-2 bottom-1.5 md:bottom-3 flex items-center justify-center p-1 md:p-2 text-center text-[8px] md:text-[10px] leading-tight font-bold text-gray-500 dark:text-gray-400 bg-gray-200/50 dark:bg-slate-800/80 rounded-lg md:group-hover:opacity-0 transition-opacity">
+                  <div className="absolute inset-x-1 bottom-1 flex items-center justify-center p-1 text-center text-xs leading-tight text-muted-foreground md:group-hover:opacity-0 transition-opacity">
                     {getDay(day) === 6 ? 'Sab' : 'Dom'}
                   </div>
                 ) : null}
@@ -298,22 +308,15 @@ export default function CalendarClient({
                 {/* Indicatore Colleghi Fuori Sede (Ferie, Smart, Malattia) */}
                 {!weekend && !holidayName && absentColleagues.length > 0 && (
                   <div 
-                    className="absolute inset-x-1 sm:inset-x-2 bottom-0.5 md:bottom-1.5 flex items-center p-0.5 sm:p-1 bg-gray-50/80 dark:bg-[#111827]/80 border border-gray-100 dark:border-slate-800 rounded text-[8px] md:text-[10px] leading-tight text-gray-500 dark:text-gray-400 hover:bg-white dark:hover:bg-slate-800 hover:shadow-md transition-all z-20 cursor-help"
+                    className="absolute inset-x-1 bottom-1 flex items-center p-1 bg-background border rounded-sm text-xs leading-tight text-muted-foreground z-20 cursor-help"
                     title={`Fuori ufficio:\n${absentColleagues.map(c => `- ${c.nome} (${c.tipo})`).join('\n')}`}
+                    aria-label={`${absentColleagues.length} colleghi fuori ufficio`}
                   >
                     <Users className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-0.5 shrink-0" />
                     <span className="truncate">{absentColleagues.length}</span>
                   </div>
                 )}
 
-                {/* Bottone "Più" che appare solo al passaggio del mouse sui giorni vuoti, anche sui festivi e weekend */}
-                {!dayEvent && (
-                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all z-10 pointer-events-none hidden md:flex">
-                    <div className="bg-white dark:bg-slate-800 rounded-full p-2 shadow-md text-gray-400 border border-gray-200 dark:border-slate-700 pointer-events-auto">
-                      <Plus className="w-5 h-5" />
-                    </div>
-                  </div>
-                )}
               </div>
             )
           })}
@@ -338,10 +341,10 @@ export default function CalendarClient({
                   <SelectValue placeholder="Seleziona..." />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="smartworking">🏠 Smartworking</SelectItem>
-                  <SelectItem value="ufficio">🏢 In Ufficio</SelectItem>
-                  <SelectItem value="ferie">🌴 Ferie</SelectItem>
-                  <SelectItem value="malattia">🤒 Malattia</SelectItem>
+                  <SelectItem value="smartworking">Smartworking</SelectItem>
+                  <SelectItem value="ufficio">In ufficio</SelectItem>
+                  <SelectItem value="ferie">Ferie</SelectItem>
+                  <SelectItem value="malattia">Malattia</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -393,6 +396,6 @@ export default function CalendarClient({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </section>
   )
 }

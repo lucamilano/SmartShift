@@ -13,10 +13,10 @@ export default function LoginForm() {
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-[#0B1120] p-4">
+    <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-3xl">SmartShift</CardTitle>
+          <CardTitle className="text-2xl">SmartShift</CardTitle>
           <CardDescription>Accedi con la tua email e password.</CardDescription>
         </CardHeader>
         <CardContent>

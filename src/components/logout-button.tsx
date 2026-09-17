@@ -12,7 +12,7 @@ export function LogoutButton() {
   const [error, setError] = useState('')
   return (
     <div>
-      <Button variant="ghost" size="icon" title="Esci" disabled={busy} onClick={async () => {
+      <Button variant="ghost" size="icon" title="Esci" aria-label="Esci" disabled={busy} onClick={async () => {
         setBusy(true)
         setError('')
         try {

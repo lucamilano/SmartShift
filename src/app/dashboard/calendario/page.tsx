@@ -25,17 +25,17 @@ export default async function CalendarioPage({ searchParams }: { searchParams: P
   const initialOthersHolidays = await getOthersHolidays(startDate, endDate)
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="bg-white dark:bg-[#111827] p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 mb-8 transition-colors">
-        <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">
+    <div className="max-w-5xl mx-auto space-y-6">
+      <header>
+        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
           {targetUserName ? `Calendario di ${targetUserName}` : 'Il Mio Calendario'}
         </h1>
-        <p className="text-gray-500 dark:text-slate-400 mt-2 text-lg">
+        <p className="mt-2 max-w-3xl text-sm text-muted-foreground sm:text-base">
           {targetUserName 
             ? 'Stai agendo come Amministratore per questo collega. Modifica i giorni o inserisci nuove presenze.' 
-            : 'Pianifica le tue giornate. Clicca su un giorno vuoto per inserire una presenza, o sulla piccola cestino per cancellarla se hai sbagliato.'}
+            : 'Seleziona un giorno per inserire una presenza. Usa il cestino sull’evento per rimuoverlo.'}
         </p>
-      </div>
+      </header>
 
       <CalendarClient initialEvents={initialEvents || []} initialOthersHolidays={initialOthersHolidays || []} targetUserId={targetUserId} targetUserName={targetUserName} />
     </div>

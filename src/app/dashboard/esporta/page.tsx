@@ -5,7 +5,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
-import { FileSpreadsheet, Download } from 'lucide-react'
+import { Download } from 'lucide-react'
 
 const MONTHS = [
   'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno',
@@ -28,32 +28,31 @@ export default function ExportPage() {
   const downloadUrl = `/api/export-excel?month=${selectedMonth}&year=${selectedYear}`
 
   return (
-    <div className="max-w-3xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="max-w-3xl mx-auto space-y-7">
       
-      <div className="bg-white dark:bg-[#111827] p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 mb-8 transition-colors">
-        <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white flex items-center">
-          <FileSpreadsheet className="mr-3 text-emerald-600 dark:text-emerald-500 h-8 w-8" />
-          Esportazione Dati Mensili
+      <header>
+        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+          Esportazione dati mensili
         </h1>
-        <p className="text-gray-500 dark:text-slate-400 mt-2 text-lg">
-          Genera il foglio presenze formattato con i colori e i giorni lavorativi per tutto il team.
+        <p className="mt-2 max-w-2xl text-sm text-muted-foreground sm:text-base">
+          Genera il foglio presenze del team per il periodo selezionato.
         </p>
-      </div>
+      </header>
 
-      <Card className="shadow-sm border-gray-200 dark:border-slate-800 dark:bg-[#111827]">
-        <CardHeader className="bg-gray-50/50 dark:bg-slate-900/50 border-b dark:border-slate-800">
-          <CardTitle className="text-xl dark:text-white">Seleziona il Periodo di Esportazione</CardTitle>
-          <CardDescription className="dark:text-slate-400">
-            Scegli mese e anno. Verrà generato un file Excel contenente dal lunedì al venerdì.
+      <Card>
+        <CardHeader className="border-b">
+          <CardTitle className="text-lg">Periodo di esportazione</CardTitle>
+          <CardDescription>
+            Il file Excel includerà i giorni lavorativi dal lunedì al venerdì.
           </CardDescription>
         </CardHeader>
-        <CardContent className="p-8 space-y-8">
+        <CardContent className="space-y-6">
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
             <div className="space-y-3">
-              <Label className="text-sm font-semibold text-gray-700 dark:text-slate-300">Mese</Label>
+              <Label className="text-sm font-medium">Mese</Label>
               <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-                <SelectTrigger className="h-12 text-base">
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Seleziona..." />
                 </SelectTrigger>
                 <SelectContent>
@@ -67,9 +66,9 @@ export default function ExportPage() {
             </div>
 
             <div className="space-y-3">
-              <Label className="text-sm font-semibold text-gray-700 dark:text-slate-300">Anno</Label>
+              <Label className="text-sm font-medium">Anno</Label>
               <Select value={selectedYear} onValueChange={setSelectedYear}>
-                <SelectTrigger className="h-12 text-base">
+                <SelectTrigger className="w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -83,11 +82,11 @@ export default function ExportPage() {
             </div>
           </div>
 
-          <div className="pt-6 border-t flex justify-end">
-            <Button asChild size="lg" className="bg-emerald-600 hover:bg-emerald-700">
+          <div className="pt-5 border-t flex justify-end">
+            <Button asChild>
               <a href={downloadUrl} download>
                 <Download className="mr-2 h-5 w-5" />
-                Scarica File Excel
+                Scarica file Excel
               </a>
             </Button>
           </div>
@@ -95,18 +94,17 @@ export default function ExportPage() {
         </CardContent>
       </Card>
       
-      {/* Anteprima Legenda */}
-      <div className="border border-dashed border-gray-300 dark:border-slate-700 rounded-xl p-6 bg-white dark:bg-[#111827] opacity-70">
-        <h3 className="text-sm font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-4 border-b dark:border-slate-800 pb-2">
-          Anteprima Legenda Colori
-        </h3>
-        <div className="flex flex-wrap gap-4">
+      <section className="border-t pt-5" aria-labelledby="legend-title">
+        <h2 id="legend-title" className="text-sm font-medium">
+          Legenda del file
+        </h2>
+        <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2">
           <div className="flex items-center"><div className="w-4 h-4 rounded-sm bg-[#4A86E8] border border-gray-400 dark:border-slate-600 mr-2"></div><span className="text-sm text-gray-700 dark:text-slate-300 font-medium">Smartworking</span></div>
           <div className="flex items-center"><div className="w-4 h-4 rounded-sm bg-[#FFFF00] border border-gray-400 dark:border-slate-600 mr-2"></div><span className="text-sm text-gray-700 dark:text-slate-300 font-medium">Ferie</span></div>
           <div className="flex items-center"><div className="w-4 h-4 rounded-sm bg-[#FF0000] border border-gray-400 dark:border-slate-600 mr-2"></div><span className="text-sm text-gray-700 dark:text-slate-300 font-medium">Malattia</span></div>
           <div className="flex items-center"><div className="w-4 h-4 rounded-sm bg-[#32CD32] border border-gray-400 dark:border-slate-600 mr-2"></div><span className="text-sm text-gray-700 dark:text-slate-300 font-medium">In Ufficio</span></div>
         </div>
-      </div>
+      </section>
 
     </div>
   )

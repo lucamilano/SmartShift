@@ -13,17 +13,15 @@ export async function Navbar() {
   const isAdmin = profile?.ruolo === 'admin'
   
   return (
-    <nav className="border-b bg-white dark:bg-[#111827] dark:border-slate-800 shadow-sm sticky top-0 z-50 transition-colors">
+    <nav className="border-b bg-background sticky top-0 z-50">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 justify-between items-center">
           
           {/* Logo e Link Principali (A sinistra) */}
-          <div className="flex items-center gap-8">
+          <div className="flex items-center gap-6">
             <Link href="/dashboard" className="flex items-center gap-2">
-              <div className="rounded-lg bg-blue-600 p-2">
-                <Calendar className="h-5 w-5 text-white" />
-              </div>
-              <span className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">SmartShift</span>
+              <Calendar className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              <span className="text-lg font-semibold tracking-tight">SmartShift</span>
             </Link>
             
             <div className="hidden md:flex space-x-1">
@@ -41,12 +39,9 @@ export async function Navbar() {
           </div>
 
           {/* Menu Admin e Logout (A destra) */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
             {isAdmin && (
-              <div className="hidden md:flex items-center space-x-1 border-r pr-4 mr-2 border-gray-200 dark:border-slate-700">
-                <span className="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded-full mr-2">
-                  Admin
-                </span>
+              <div className="hidden md:flex items-center space-x-1 border-r pr-3 mr-1">
                 <Button asChild variant="ghost" className="text-gray-600 dark:text-gray-300 hover:text-blue-700 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-slate-800">
                   <Link href="/dashboard/esporta">
                     <FileSpreadsheet className="mr-2 h-4 w-4" /> Esporta
@@ -63,12 +58,12 @@ export async function Navbar() {
             <div className="flex items-center gap-2 sm:gap-3">
               <ThemeToggle />
               
-              <div className="hidden sm:block text-right border-l pl-4 ml-1 border-gray-200 dark:border-slate-700">
-                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{profile?.nome || 'Utente'}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">{user.email}</p>
+              <div className="hidden lg:block text-right border-l pl-3 ml-1">
+                <p className="text-sm font-medium">{profile?.nome || 'Utente'}</p>
+                <p className="text-xs text-muted-foreground">{user.email}</p>
               </div>
               
-              <Button asChild variant="ghost" size="icon" title="Cambia password"><Link href="/dashboard/account"><KeyRound className="h-5 w-5" /></Link></Button>
+              <Button asChild variant="ghost" size="icon" title="Cambia password"><Link href="/dashboard/account" aria-label="Cambia password"><KeyRound className="h-5 w-5" /></Link></Button>
               <LogoutButton />
             </div>
           </div>
@@ -77,26 +72,25 @@ export async function Navbar() {
       </div>
 
       {/* --- MENU BOTTOM MOBILE RESPONSIVE --- */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-[#111827] border-t border-gray-200 dark:border-slate-800 shadow-[0_-2px_10px_rgba(0,0,0,0.05)] z-50 px-2 pb-safe transition-colors">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-background border-t z-50 px-2 pb-safe">
         <div className="flex justify-around items-center h-16">
           <Link href="/dashboard" className="flex flex-col items-center justify-center w-full h-full text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50/50 dark:hover:bg-slate-800 transition-colors">
             <Home className="h-5 w-5 mb-1" />
-            <span className="text-[10px] font-medium">Home</span>
+            <span className="text-xs font-medium">Home</span>
           </Link>
           <Link href="/dashboard/calendario" className="flex flex-col items-center justify-center w-full h-full text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50/50 dark:hover:bg-slate-800 transition-colors">
             <Calendar className="h-5 w-5 mb-1" />
-            <span className="text-[10px] font-medium">Turni</span>
+            <span className="text-xs font-medium">Turni</span>
           </Link>
           {isAdmin && (
             <>
               <Link href="/dashboard/esporta" className="flex flex-col items-center justify-center w-full h-full text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50/50 dark:hover:bg-slate-800 transition-colors">
                 <FileSpreadsheet className="h-5 w-5 mb-1" />
-                <span className="text-[10px] font-medium">Esporta</span>
+                <span className="text-xs font-medium">Esporta</span>
               </Link>
-              <Link href="/dashboard/team" className="flex flex-col items-center justify-center w-full h-full text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50/50 dark:hover:bg-slate-800 transition-colors relative">
-                <span className="absolute top-1 right-2 w-2 h-2 bg-blue-500 rounded-full"></span>
+              <Link href="/dashboard/team" className="flex flex-col items-center justify-center w-full h-full text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50/50 dark:hover:bg-slate-800 transition-colors">
                 <Users className="h-5 w-5 mb-1" />
-                <span className="text-[10px] font-medium">Team</span>
+                <span className="text-xs font-medium">Team</span>
               </Link>
             </>
           )}
