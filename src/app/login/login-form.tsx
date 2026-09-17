@@ -33,7 +33,18 @@ export default function LoginForm() {
                 setError(result.error.status === 429 ? 'Troppi tentativi. Attendi un minuto e riprova.' : 'Email o password non corrette.')
               } else {
                 const status = await fetch('/api/account-status', { cache: 'no-store' })
-                if (status.ok) { router.replace('/dashboard'); router.refresh(); return }
+                if (status.ok) {
+                  if (status.status === 200 && (await status.json()).status === 'password-change-required') router.replace('/primo-accesso')
+                  else router.replace('/dashboard')
+                  router.refresh()
+                  return
+                }
+                if (status.status === 410) {
+                  await authClient.signOut()
+                  setError('La password temporanea è scaduta. Chiedi all’amministratore di reinviare l’invito.')
+                  setBusy(false)
+                  return
+                }
                 await authClient.signOut()
                 setError('Account non disponibile. Contatta l’amministratore.')
               }

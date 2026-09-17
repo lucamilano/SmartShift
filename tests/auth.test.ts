@@ -9,7 +9,7 @@ const origin = 'http://localhost:3000'
 const password = 'test-password-long-and-unique'
 async function fixture() {
   const db = new DatabaseSync(':memory:')
-  for (const migration of ['0001_initial', '0002_auth', '0003_profile_auth_link']) {
+  for (const migration of ['0001_initial', '0002_auth', '0003_profile_auth_link', '0004_user_invitations']) {
     db.exec(readFileSync(`migrations/${migration}.sql`, 'utf8'))
   }
   db.exec(await provisionSql('admin@example.com', password, 'admin'))
@@ -63,8 +63,10 @@ test('password change requires current password; operator reset revokes sessions
     db.exec('UPDATE profili SET is_active = 0')
     db.exec(await provisionSql('admin@example.com', password, 'user'))
     assert.equal(await (await request('/get-session', undefined, cookie)).json(), null)
-    const profile = db.prepare('SELECT ruolo, is_active FROM profili').get()
+    const profile = db.prepare('SELECT ruolo, is_active, must_change_password, invitation_status FROM profili').get()
     assert.equal(profile?.ruolo, 'admin')
     assert.equal(profile?.is_active, 0)
+    assert.equal(profile?.must_change_password, 0)
+    assert.equal(profile?.invitation_status, 'completed')
   } finally { db.close() }
 })

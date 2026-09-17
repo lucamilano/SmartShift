@@ -1,3 +1,7 @@
 APP_URL=http://127.0.0.1:3000
 # Generate with: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 BETTER_AUTH_SECRET=replace-with-at-least-32-random-characters
+# Optional until invitation emails are enabled. Use a verified Resend domain for real recipients.
+RESEND_API_KEY=replace-with-resend-api-key
+EMAIL_FROM=SmartShift <onboarding@resend.dev>
+EMAIL_FROM_NAME=SmartShift

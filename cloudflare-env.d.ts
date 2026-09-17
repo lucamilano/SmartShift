@@ -5,5 +5,8 @@ declare global {
     DB: D1Database
     APP_URL: string
     BETTER_AUTH_SECRET: string
+    RESEND_API_KEY?: string
+    EMAIL_FROM?: string
+    EMAIL_FROM_NAME?: string
   }
 }

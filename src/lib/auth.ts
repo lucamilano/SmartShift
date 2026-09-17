@@ -18,8 +18,8 @@ export const getCurrentUser = cache(async (): Promise<Profile | null> => {
   if (!session) return null
   const { DB } = await getEnvironment()
   const row = await DB.prepare('SELECT * FROM profili WHERE auth_user_id = ? AND is_active = 1')
-    .bind(session.user.id).first<Omit<Profile, 'is_active'> & { is_active: number }>()
-  return row ? { ...row, is_active: Boolean(row.is_active) } : null
+    .bind(session.user.id).first<Omit<Profile, 'is_active' | 'must_change_password'> & { is_active: number; must_change_password: number }>()
+  return row ? { ...row, is_active: Boolean(row.is_active), must_change_password: Boolean(row.must_change_password) } : null
 })
 
 export async function requireUser() {

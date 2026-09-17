@@ -6,7 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { Users, UserPlus, FileEdit, CalendarDays, Info, Trash2 } from 'lucide-react'
+import { Users, UserPlus, FileEdit, CalendarDays, Mail, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
@@ -22,7 +22,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { updateProfile, deleteUserAction } from './actions'
+import { updateProfile, deleteUserAction, createUserAction, resendInvitationAction } from './actions'
 
 type Member = {
   id: string
@@ -30,6 +30,8 @@ type Member = {
   nome: string
   cognome: string
   ruolo: string
+  must_change_password: boolean
+  invitation_status: 'pending' | 'sent' | 'failed' | 'completed'
 }
 
 type Event = {
@@ -50,6 +52,9 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
 
   // Stati Modale Nuovo Collega
   const [isNewUserModalOpen, setIsNewUserModalOpen] = useState(false)
+  const [newNome, setNewNome] = useState('')
+  const [newCognome, setNewCognome] = useState('')
+  const [newEmail, setNewEmail] = useState('')
 
   // Stati Modale Errore custom
   const [alertOpen, setAlertOpen] = useState(false)
@@ -101,6 +106,31 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
     } else {
       setMembers(members.filter(m => m.id !== userToDelete.id))
       setDeleteConfirmOpen(false)
+    }
+  }
+
+  const showAlert = (message: string) => { setAlertMessage(message); setAlertOpen(true) }
+
+  const handleCreateUser = async () => {
+    setLoading(true)
+    const result = await createUserAction(newNome, newCognome, newEmail)
+    setLoading(false)
+    if (result.error) return showAlert(result.error)
+    if (result.member) setMembers(current => [...current, result.member].sort((a, b) => `${a.cognome} ${a.nome}`.localeCompare(`${b.cognome} ${b.nome}`)))
+    setNewNome(''); setNewCognome(''); setNewEmail(''); setIsNewUserModalOpen(false)
+    showAlert(result.warning || 'Account creato e invito inviato.')
+  }
+
+  const handleResendInvitation = async (member: Member) => {
+    setLoading(true)
+    const result = await resendInvitationAction(member.id)
+    setLoading(false)
+    if (result.error) {
+      setMembers(current => current.map(item => item.id === member.id ? { ...item, invitation_status: 'failed' } : item))
+      showAlert(result.error)
+    } else {
+      setMembers(current => current.map(item => item.id === member.id ? { ...item, invitation_status: 'sent' } : item))
+      showAlert('Nuova password temporanea inviata. Quella precedente non è più valida.')
     }
   }
 
@@ -195,6 +225,7 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
                             : <span className="uppercase tracking-wider">Utente</span>
                           }
                         </div>
+                        {member.must_change_password && <Badge variant="outline" className="mt-1 text-amber-700 border-amber-300">Primo accesso in attesa</Badge>}
                       </div>
                     </div>
                   </div>
@@ -218,6 +249,7 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
                     >
                       <FileEdit className="h-4 w-4" />
                     </Button>
+                    {member.must_change_password && <Button variant="ghost" size="icon" disabled={loading} onClick={() => handleResendInvitation(member)} title="Reinvia invito" className="h-8 w-8 text-amber-700 bg-amber-50 hover:bg-amber-100 shrink-0"><Mail className="h-4 w-4" /></Button>}
                     <Button 
                       variant="ghost" 
                       size="icon" 
@@ -266,7 +298,7 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
                             {(member.nome?.[0] || 'U') + (member.cognome?.[0] || '')}
                           </AvatarFallback>
                         </Avatar>
-                        <span>{[member.nome, member.cognome].filter(Boolean).join(' ') || member.email}</span>
+                        <div><span>{[member.nome, member.cognome].filter(Boolean).join(' ') || member.email}</span><div className="text-xs text-muted-foreground">{member.email}</div></div>
                       </div>
                     </TableCell>
                     <TableCell>
@@ -274,6 +306,7 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
                         ? <span className="text-xs uppercase font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded-md">Admin</span>
                         : <span className="text-xs uppercase font-semibold text-gray-500 dark:text-slate-400">Utente</span>
                       }
+                      {member.must_change_password && <Badge variant="outline" className="ml-2 text-amber-700 border-amber-300">Invito {member.invitation_status === 'failed' ? 'non inviato' : 'in attesa'}</Badge>}
                     </TableCell>
                     <TableCell>{statusBadge}</TableCell>
                     <TableCell className="text-right pr-6">
@@ -292,12 +325,13 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
                         >
                           <FileEdit className="h-4 w-4" />
                         </Button>
+                        {member.must_change_password && <Button variant="ghost" size="icon" disabled={loading} onClick={() => handleResendInvitation(member)} title="Genera una nuova password temporanea e reinvia" className="h-8 w-8 text-amber-700 hover:bg-amber-50"><Mail className="h-4 w-4" /></Button>}
                         <Button 
                           variant="ghost" 
                           size="icon" 
                           onClick={() => handleDeleteClick(member)}
                           className="h-8 w-8 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:bg-red-900/50 hover:bg-red-50" 
-                          title="Elimina account"
+                          title="Disattiva account"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -357,7 +391,7 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
         </DialogContent>
       </Dialog>
 
-      {/* --- Modale "Nuovo Collega" (Primo accesso) --- */}
+      {/* --- Modale "Nuovo Collega" --- */}
       <Dialog open={isNewUserModalOpen} onOpenChange={setIsNewUserModalOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -365,31 +399,19 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
               <UserPlus className="h-5 w-5 mr-2 text-blue-600" />
               Aggiungi nuovo dipendente
             </DialogTitle>
+            <DialogDescription>Il nuovo account sarà un utente base e riceverà una password temporanea valida 24 ore.</DialogDescription>
           </DialogHeader>
-          
-          <div className="py-6 space-y-4 text-gray-600">
-            <div className="bg-blue-50 text-blue-800 p-4 rounded-xl border border-blue-100 flex items-start">
-              <Info className="h-5 w-5 mr-3 mt-0.5 shrink-0" />
-              <p className="text-sm leading-relaxed">
-                Le registrazioni pubbliche sono disabilitate. Ogni account viene creato dall’amministratore.
-              </p>
+          <div className="py-4 space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2"><Label htmlFor="newNome">Nome</Label><Input id="newNome" value={newNome} onChange={event => setNewNome(event.target.value)} required maxLength={100} /></div>
+              <div className="space-y-2"><Label htmlFor="newCognome">Cognome</Label><Input id="newCognome" value={newCognome} onChange={event => setNewCognome(event.target.value)} required maxLength={100} /></div>
             </div>
-            
-            <p className="text-sm leading-relaxed">
-              Per aggiungere un nuovo collega segui questi step:
-            </p>
-            <ol className="list-decimal pl-5 text-sm space-y-2 font-medium text-gray-700">
-              <li>Chiedi al gestore dell’app di creare un account per l’email del collega.</li>
-              <li>Condividi con lui l’indirizzo di SmartShift e le credenziali attraverso un canale sicuro.</li>
-              <li>Il collega può cambiare la password dalla pagina Account.</li>
-              <li>Usa Modifica per completare nome e cognome.</li>
-            </ol>
+            <div className="space-y-2"><Label htmlFor="newEmail">Email</Label><Input id="newEmail" value={newEmail} onChange={event => setNewEmail(event.target.value)} type="email" required maxLength={254} autoComplete="off" /></div>
+            <p className="text-xs text-muted-foreground">Il ruolo amministratore potrà essere assegnato in seguito con “Modifica”.</p>
           </div>
-          
           <DialogFooter>
-            <Button onClick={() => setIsNewUserModalOpen(false)} className="w-full">
-              Ho capito
-            </Button>
+            <Button variant="ghost" onClick={() => setIsNewUserModalOpen(false)} disabled={loading}>Annulla</Button>
+            <Button onClick={handleCreateUser} disabled={loading || !newNome.trim() || !newCognome.trim() || !newEmail.trim()}>{loading ? 'Creazione…' : 'Crea e invia invito'}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -420,7 +442,7 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
           <AlertDialogFooter>
             <AlertDialogCancel disabled={loading}>Annulla</AlertDialogCancel>
             <AlertDialogAction onClick={handleConfirmDelete} disabled={loading} className="bg-red-600 hover:bg-red-700">
-              {loading ? 'Eliminazione in corso...' : 'Sì, Elimina Utente'}
+              {loading ? 'Disattivazione in corso...' : 'Sì, disattiva utente'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

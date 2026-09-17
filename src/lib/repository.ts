@@ -1,7 +1,7 @@
 import type { D1Database } from '@cloudflare/workers-types'
 import type { CalendarEvent, Profile } from './models'
 
-type ProfileRow = Omit<Profile, 'is_active'> & { is_active: number }
+type ProfileRow = Omit<Profile, 'is_active' | 'must_change_password'> & { is_active: number; must_change_password: number }
 type EventRow = Omit<CalendarEvent, 'mezza_giornata'> & { mezza_giornata: number }
 
 export class UserError extends Error {}
@@ -28,7 +28,9 @@ export class Repository {
     const row = await this.db.prepare('SELECT * FROM profili WHERE id = ? AND is_active = 1')
       .bind(this.actorId).first<ProfileRow>()
     if (!row) throw new UserError('Account non autorizzato o disattivato.')
-    return { ...row, is_active: Boolean(row.is_active) }
+    const profile = { ...row, is_active: Boolean(row.is_active), must_change_password: Boolean(row.must_change_password) }
+    if (profile.must_change_password) throw new UserError('Completa il primo accesso prima di usare SmartShift.')
+    return profile
   }
 
   private async admin() {
@@ -43,7 +45,7 @@ export class Repository {
     const row = await this.db.prepare('SELECT * FROM profili WHERE id = ? AND is_active = 1')
       .bind(targetId).first<ProfileRow>()
     if (!row) throw new UserError('Utente non disponibile.')
-    return { ...row, is_active: Boolean(row.is_active) }
+    return { ...row, is_active: Boolean(row.is_active), must_change_password: Boolean(row.must_change_password) }
   }
 
   async profile(targetId: string) {
@@ -53,7 +55,7 @@ export class Repository {
   async members(): Promise<Profile[]> {
     await this.admin()
     const { results } = await this.db.prepare('SELECT * FROM profili WHERE is_active = 1 ORDER BY cognome, nome, email').all<ProfileRow>()
-    return results.map(row => ({ ...row, is_active: Boolean(row.is_active) }))
+    return results.map(row => ({ ...row, is_active: Boolean(row.is_active), must_change_password: Boolean(row.must_change_password) }))
   }
 
   async events(start: string, end: string, targetId?: string): Promise<CalendarEvent[]> {

@@ -8,6 +8,7 @@ import { Repository } from '../src/lib/repository'
 function fixture() {
   const sqlite = new DatabaseSync(':memory:')
   sqlite.exec(readFileSync('migrations/0001_initial.sql', 'utf8'))
+  sqlite.exec(readFileSync('migrations/0004_user_invitations.sql', 'utf8'))
   sqlite.exec(`INSERT INTO profili(id,email,ruolo) VALUES
     ('admin','admin@example.com','admin'), ('alice','alice@example.com','user'), ('bob','bob@example.com','user')`)
   // Run the production SQL against SQLite with the D1 prepare/bind result shape.
@@ -85,5 +86,15 @@ test('bound SQL handles hostile text without changing its meaning', async () => 
     await admin.updateProfile('alice', name, '', 'user')
     assert.equal((await admin.profile('alice')).nome, name)
     assert.equal((await admin.members()).length, 3)
+  } finally { sqlite.close() }
+})
+
+test('an invited user cannot use application data before changing the temporary password', async () => {
+  const { sqlite, alice } = fixture()
+  try {
+    sqlite.prepare(`UPDATE profili SET must_change_password = 1, invitation_status = 'sent', temporary_password_expires_at = ? WHERE id = 'alice'`)
+      .run(new Date(Date.now() + 60_000).toISOString())
+    await assert.rejects(alice.events('2026-09-01', '2026-09-30'), /primo accesso/)
+    await assert.rejects(alice.addEvent('2026-09-17', 'ufficio', false), /primo accesso/)
   } finally { sqlite.close() }
 })

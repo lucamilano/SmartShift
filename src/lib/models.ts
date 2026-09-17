@@ -6,6 +6,12 @@ export interface Profile {
   ruolo: 'user' | 'admin'
   is_active: boolean
   created_at: string
+  must_change_password: boolean
+  temporary_password_expires_at: string | null
+  invitation_status: 'pending' | 'sent' | 'failed' | 'completed'
+  invited_at: string | null
+  invitation_sent_at: string | null
+  invited_by: string | null
 }
 
 export interface CalendarEvent {

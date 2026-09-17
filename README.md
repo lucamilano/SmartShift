@@ -10,6 +10,8 @@ Corporate attendance and shift planner with personal calendars, user administrat
 
 Dal 17 settembre 2026 il progetto usa Cloudflare per hosting, database e autenticazione. Il login passa dal magic link a **email e password**, con cambio password nella pagina Account. Calendario, gestione dei profili, disattivazione utenti ed esportazione Excel restano disponibili.
 
+Gli amministratori possono creare un collega inserendo nome, cognome ed email. Il nuovo account nasce come utente base, riceve una password temporanea valida 24 ore e deve cambiarla al primo accesso. L'amministratore può assegnare in seguito il ruolo admin. L'invio usa Resend e richiede la [configurazione del mittente](CLOUDFLARE.md#email-di-invito).
+
 La migrazione parte da un database nuovo: utenti e dati di Supabase non vengono importati. Non occorre configurare Cloudflare Access o un team Zero Trust. I dettagli delle modifiche sono nel [changelog](CHANGELOG.md#2026-09-17--migrazione-a-cloudflare).
 
 ## Stack
@@ -62,6 +64,7 @@ La [GitHub Action](.github/workflows/deploy.yml) esegue test, lint e build sulle
 | [README](README.md) | Panoramica, novità e avvio rapido |
 | [Guida Cloudflare](CLOUDFLARE.md) | Architettura, configurazione, account, database e deploy |
 | [Changelog](CHANGELOG.md) | Modifiche datate e cambiamenti da considerare negli aggiornamenti |
+| [Piano gestione utenti](PIANO_GESTIONE_UTENTI.md) | Proposta da implementare: creazione da admin, email iniziale e cambio password obbligatorio; analisi dei riferimenti al vecchio login |
 
 ## Licenza
 

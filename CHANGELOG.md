@@ -9,6 +9,14 @@ Le voci descrivono le modifiche al repository. La pipeline GitHub pubblica gli a
 - Aggiunti avvio manuale da Actions e serializzazione dei rilasci; nessuna credenziale applicativa viene modificata dal deploy.
 - Documentata la configurazione una tantum del repository secret `CLOUDFLARE_API_TOKEN`.
 
+## 2026-09-17 — Inviti utenti dal pannello
+
+- Aggiunta la creazione di utenti base dalla pagina Team con nome, cognome ed email.
+- Aggiunte password temporanee di 24 ore, reinvio con rotazione credenziale e cambio obbligatorio al primo accesso.
+- Bloccati dashboard, operazioni e export finché il primo accesso non è completato; le registrazioni pubbliche restano chiuse.
+- Integrato l'invio transazionale tramite Resend con credenziali conservate nei secret del Worker.
+- Conservata la promozione ad amministratore come scelta esplicita successiva e aggiunti test per creazione, duplicati e reinvio.
+
 ## 2026-09-17 — Migrazione a Cloudflare
 
 ### Hosting e database

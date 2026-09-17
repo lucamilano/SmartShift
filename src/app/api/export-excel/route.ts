@@ -13,12 +13,13 @@ export async function GET(request: Request) {
 
   const user = await getCurrentUser()
   if (!user) return new Response('Unauthorized', { status: 401 })
+  if (user.must_change_password) return new Response('First access required', { status: 403 })
   if (user.ruolo !== 'admin') return new Response('Forbidden', { status: 403 })
   if (!Number.isInteger(month) || month < 0 || month > 11 || !Number.isInteger(year) || year < 1900 || year > 9999) {
     return new Response('Mese o anno non valido', { status: 400 })
   }
   const repository = await getRepository()
-  const allUsers = await repository.members()
+  const allUsers = (await repository.members()).filter(member => !member.must_change_password)
 
   // Estrai tutti gli eventi del mese (es: dal 2026-02-01 al 2026-02-28)
   const targetDate = new Date(year, month, 1)

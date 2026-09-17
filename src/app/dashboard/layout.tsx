@@ -1,4 +1,5 @@
 import { requireUser } from '@/lib/auth'
+import { redirect } from 'next/navigation'
 
 export const dynamic = 'force-dynamic'
 
@@ -9,7 +10,8 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode
 }) {
-  await requireUser()
+  const user = await requireUser()
+  if (user.must_change_password) redirect('/primo-accesso')
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans text-gray-900 dark:bg-[#0B1120] dark:text-gray-100 transition-colors">
       <Navbar />

@@ -19,7 +19,8 @@ INSERT INTO account (id, "accountId", "providerId", "userId", password, "created
     ON CONFLICT(id) DO UPDATE SET password = excluded.password, "updatedAt" = excluded."updatedAt";
 INSERT INTO profili (id, email, ruolo, auth_user_id)
     SELECT id, email, ${quote(role)}, id FROM "user" WHERE email = ${mail}
-    ON CONFLICT(email) DO UPDATE SET auth_user_id = excluded.auth_user_id;
+    ON CONFLICT(email) DO UPDATE SET auth_user_id = excluded.auth_user_id,
+      must_change_password = 0, temporary_password_expires_at = NULL, invitation_status = 'completed';
 DELETE FROM session WHERE "userId" IN (SELECT id FROM "user" WHERE email = ${mail});
 `;
 }
