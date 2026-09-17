@@ -115,10 +115,25 @@ export class Repository {
     if (!result.meta.changes) throw new UserError('Utente non disponibile.')
   }
 
-  async deactivateProfile(id: string) {
+  async removeProfile(id: string) {
     await this.admin()
-    if (id === this.actorId) throw new UserError('Non puoi disattivare il tuo account.')
-    const result = await this.db.prepare('UPDATE profili SET is_active = 0 WHERE id = ? AND is_active = 1').bind(id).run()
-    if (!result.meta.changes) throw new UserError('Utente non disponibile.')
+    if (id === this.actorId) throw new UserError('Non puoi rimuovere il tuo account.')
+    const profile = await this.db.prepare('SELECT id, auth_user_id FROM profili WHERE id = ? AND is_active = 1')
+      .bind(id).first<{ id: string; auth_user_id: string | null }>()
+    if (!profile) throw new UserError('Utente non disponibile.')
+
+    // Keep calendar rows for operational traceability, but remove the identity and
+    // all authentication material.  The original email is released so a later
+    // invitation creates a genuinely new profile, rather than reviving this one.
+    const archivedEmail = `deleted-${profile.id}@invalid.smartshift`
+    const statements = [
+      this.db.prepare(`UPDATE profili SET
+        email = ?, nome = 'Account', cognome = 'eliminato', ruolo = 'user', is_active = 0,
+        auth_user_id = NULL, must_change_password = 0, temporary_password_expires_at = NULL,
+        invitation_status = 'completed', invited_at = NULL, invitation_sent_at = NULL, invited_by = NULL
+        WHERE id = ? AND is_active = 1`).bind(archivedEmail, profile.id),
+    ]
+    if (profile.auth_user_id) statements.push(this.db.prepare('DELETE FROM "user" WHERE id = ?').bind(profile.auth_user_id))
+    await this.db.batch(statements)
   }
 }

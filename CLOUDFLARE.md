@@ -18,7 +18,7 @@ L'autenticazione usa **Better Auth**, eseguito nel Worker con dati in D1. Nessun
 | Sessioni Supabase | Sessioni Better Auth in D1, logout e cambio password |
 | Trigger di creazione profili | Provisioning esplicito di credenziali e profilo |
 | Policy RLS | Repository server: account attivo, ruolo e titolarità delle operazioni |
-| Soft delete | Disattivazione profilo, blocco delle richieste anche con sessione valida |
+| Rimozione account | Revoca credenziali e sessioni, archiviazione anonimizzata di presenze e profilo |
 | Export Excel | ExcelJS nel Worker, endpoint riservato agli amministratori |
 
 Nel repository non sono stati trovati usi di Supabase Storage, Realtime, Edge Functions separate, login social, upload o job programmati. Non sono stati importati dati da Supabase.
@@ -62,7 +62,7 @@ Ogni esecuzione genera una password casuale e la salva in `.wrangler/private/rem
 
 Dopo il primo login cambiare la password dalla pagina **Account**, accessibile con l'icona della chiave, e cancellare il file di credenziali iniziali. Il cambio richiede la password attuale e chiude le altre sessioni. Se dimentichi la password, riesegui il provisioning; non è configurato un recupero via email.
 
-Nome, cognome, ruolo e disattivazione si gestiscono nella pagina Team. Gli amministratori non possono disattivarsi o rimuovere il proprio ruolo. La disattivazione mantiene lo storico; utenti disattivati ed eventi relativi sono esclusi dagli elenchi attivi e dagli export, come nel comportamento precedente.
+Nome, cognome, ruolo e rimozione si gestiscono nella pagina Team. Gli amministratori non possono rimuoversi o rimuovere il proprio ruolo. La rimozione elimina credenziali e sessioni, libera l'indirizzo email e anonimizza il profilo archiviato; le presenze restano disponibili solo come storico tecnico e sono escluse da elenchi attivi ed export. Aggiungere in seguito lo stesso indirizzo crea quindi un utente nuovo, senza nome, privilegi o eventi del precedente.
 
 ## Email di invito
 

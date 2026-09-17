@@ -5,6 +5,7 @@ import assert from 'node:assert/strict'
 import type { D1Database, D1PreparedStatement } from '@cloudflare/workers-types'
 import type { Profile } from '../src/lib/models'
 import { createInvitation, renewInvitation, sendInvitationEmail } from '../src/lib/invitations'
+import { Repository } from '../src/lib/repository'
 
 function fixture() {
   const sqlite = new DatabaseSync(':memory:')
@@ -69,6 +70,30 @@ test('reinviting rotates the credential, revokes sessions, and never promotes th
     assert.notEqual(newHash, oldHash)
     assert.equal(sqlite.prepare('SELECT count(*) AS n FROM session WHERE "userId" = ?').get(first.id)?.n, 0)
     assert.equal(sqlite.prepare('SELECT ruolo FROM profili WHERE id = ?').get(first.id)?.ruolo, 'user')
+  } finally { sqlite.close() }
+})
+
+test('a deleted email creates a separate new profile without recovering the former identity', async () => {
+  const { sqlite, db, admin } = fixture()
+  try {
+    const first = await createInvitation(db, admin, { nome: 'Alice', cognome: 'Rossi', email: 'alice@example.com' })
+    sqlite.prepare(`INSERT INTO eventi_calendario(id,utente_id,data,tipo) VALUES ('event',?,'2026-09-17','ferie')`).run(first.id)
+    await new Repository(db, 'admin').removeProfile(first.id)
+
+    const second = await createInvitation(db, admin, { nome: 'Beatrice', cognome: 'Verdi', email: 'alice@example.com' })
+    assert.notEqual(second.id, first.id)
+    const newProfile = sqlite.prepare('SELECT nome, cognome, ruolo, is_active FROM profili WHERE id = ?').get(second.id)
+    assert.equal(newProfile?.nome, 'Beatrice')
+    assert.equal(newProfile?.cognome, 'Verdi')
+    assert.equal(newProfile?.ruolo, 'user')
+    assert.equal(newProfile?.is_active, 1)
+    const oldProfile = sqlite.prepare('SELECT email, nome, cognome, is_active FROM profili WHERE id = ?').get(first.id)
+    assert.equal(oldProfile?.email, `deleted-${first.id}@invalid.smartshift`)
+    assert.equal(oldProfile?.nome, 'Account')
+    assert.equal(oldProfile?.cognome, 'eliminato')
+    assert.equal(oldProfile?.is_active, 0)
+    assert.equal(sqlite.prepare('SELECT count(*) AS n FROM eventi_calendario WHERE utente_id = ?').get(first.id)?.n, 1)
+    assert.equal(sqlite.prepare('SELECT count(*) AS n FROM eventi_calendario WHERE utente_id = ?').get(second.id)?.n, 0)
   } finally { sqlite.close() }
 })
 

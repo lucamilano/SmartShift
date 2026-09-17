@@ -22,11 +22,11 @@ export async function updateProfile(userId: string, nome: string, cognome: strin
 export async function deleteUserAction(userIdToDelete: string) {
   const repository = await getRepository()
   try {
-    await repository.deactivateProfile(userIdToDelete)
+    await repository.removeProfile(userIdToDelete)
   } catch (error) {
     if (error instanceof UserError) return { error: error.message }
-    console.error('Unable to deactivate profile', error)
-    return { error: 'Impossibile disattivare il profilo. Riprova.' }
+    console.error('Unable to remove profile', error)
+    return { error: 'Impossibile rimuovere il profilo. Riprova.' }
   }
   revalidatePath('/dashboard', 'layout')
   return { success: true }

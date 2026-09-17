@@ -336,7 +336,7 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
                           size="icon" 
                           onClick={() => handleDeleteClick(member)}
                           className="h-8 w-8 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:bg-red-900/50 hover:bg-red-50" 
-                          title="Disattiva account"
+                          title="Rimuovi account"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -446,16 +446,16 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
       <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Sei sicuro?</AlertDialogTitle>
+            <AlertDialogTitle>Rimuovere l’account?</AlertDialogTitle>
             <AlertDialogDescription>
-              Stai per disattivare il profilo di <strong>{userToDelete?.nome} {userToDelete?.cognome}</strong>.
-              L’utente non potrà più accedere. Le presenze già registrate resteranno archiviate.
+              Stai per rimuovere l’account di <strong>{userToDelete?.nome} {userToDelete?.cognome}</strong>.
+              L’utente non potrà più accedere e l’email potrà essere usata per un nuovo profilo. Le presenze già registrate resteranno archiviate in forma anonimizzata.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={loading}>Annulla</AlertDialogCancel>
             <AlertDialogAction onClick={handleConfirmDelete} disabled={loading} className="bg-red-600 hover:bg-red-700">
-              {loading ? 'Disattivazione in corso...' : 'Sì, disattiva utente'}
+              {loading ? 'Rimozione in corso...' : 'Sì, rimuovi utente'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

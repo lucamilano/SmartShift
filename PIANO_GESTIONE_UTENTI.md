@@ -30,7 +30,7 @@ La promozione ad amministratore è già implementata: va mantenuta e testata nel
 
 1. Un amministratore attivo apre «Nuovo Collega» e compila nome, cognome ed email.
 2. Il server ricontrolla sessione e ruolo, valida i campi e normalizza l'email. Nome e cognome obbligatori, massimo 100 caratteri ciascuno; email valida e massimo 254 caratteri.
-3. Se l'email esiste già, anche per un account disattivato, la creazione si ferma con un messaggio. Non deve resettare credenziali, riattivare utenti o cambiare privilegi implicitamente.
+3. Se l'email appartiene a un account attivo, la creazione si ferma con un messaggio. La rimozione anonimizza e archivia il vecchio profilo, revoca le credenziali e libera l'indirizzo: aggiungendo di nuovo la stessa email si crea un profilo distinto, con un nuovo ID, dati personali, ruolo base e credenziali temporanee.
 4. Il server genera una password casuale crittograficamente sicura, compatibile con la policy Better Auth, e salva soltanto l'hash. Crea account e profilo collegati con ruolo `user`, indipendentemente da eventuali valori di ruolo inviati dal browser.
 5. L'account viene marcato come «cambio password obbligatorio». Il sistema invia un'email con nome, URL di login, email dell'account, password temporanea e scadenza.
 6. Il pannello mostra l'esito reale: account creato e invio accettato, oppure account creato ma invio fallito. Nel secondo caso mostra una sola volta all'amministratore la password temporanea generata per quell'account, da consegnare tramite un canale alternativo. L'accettazione del messaggio da parte del servizio non garantisce la consegna in casella.
@@ -93,7 +93,7 @@ Sono emersi invece questi testi e comportamenti da rivedere insieme al nuovo flu
 | --- | --- | --- |
 | Team, «Nuovo Collega» | Istruzioni di creazione manuale e condivisione credenziali | Sostituire con il form e l'invio email |
 | Team, modifica profilo | «Per cambiare l'email, contatta il supporto» | Chiarire chi gestisce il cambio; un cambio email completo richiede sincronizzazione e verifica, da valutare separatamente |
-| Team, disattivazione | Pulsanti «Elimina account/utente» per un'operazione che disattiva | Uniformare a «Disattiva utente» |
+| Team, rimozione | Il pulsante archivia il profilo, revoca l'accesso e libera l'email | Mantenere chiaro che una successiva registrazione crea un nuovo utente |
 | Login | Recupero password tramite amministratore | Resta valido; documentare se resta via CLI o se aggiungere successivamente un reset dal pannello |
 | Pagina Account | Cambio password sempre facoltativo | Conservare il cambio ordinario e aggiungere il percorso obbligatorio |
 | Guida Cloudflare | Nessun invio email e provisioning soltanto CLI | Aggiornare quando la nuova funzionalità sarà implementata; preservare il changelog storico |
@@ -103,11 +103,11 @@ Questi punti non sono integrazioni Supabase residue: sono limiti e testi del flu
 ## Verifiche di accettazione
 
 - [x] Solo un admin attivo può creare utenti, reinviare inviti o modificare ruoli, anche chiamando direttamente le azioni server.
-- [x] Nome/cognome/email obbligatori; duplicati e richieste concorrenti non creano utenti doppi e non resettano utenti esistenti.
+- [x] Nome/cognome/email obbligatori; duplicati attivi e richieste concorrenti non creano utenti doppi né resettano utenti esistenti. Un'email di un profilo rimosso crea invece un nuovo utente indipendente.
 - [x] Nuovi utenti sempre `user`; promozione solo tramite modifica esplicita dell'amministratore.
 - [x] Creazione coerente di credenziali e profilo; nessuna password in log o database in chiaro. In caso di invio fallito, la password temporanea è restituita una sola volta alla sessione dell'amministratore che ha creato o reinviato l'invito.
 - [ ] Email contiene URL corretto, credenziale temporanea e scadenza; errore di invio visibile e reinvio recuperabile.
-- [x] Credenziale sostituita non funziona; il reinvio non riattiva account disabilitati. La scadenza viene controllata prima dell'accesso applicativo.
+- [x] Credenziale sostituita non funziona; la rimozione revoca l'accesso, anonimizza il profilo archiviato e libera l'email per una nuova registrazione indipendente. La scadenza viene controllata prima dell'accesso applicativo.
 - [x] Primo accesso limitato al cambio password: URL diretti, API, export e server action non consentono aggiramenti.
 - [x] Cambio completato abilita l'app e invalida vecchia password e altre sessioni; errori non sbloccano prematuramente l'account.
 - [x] Registrazioni pubbliche ancora chiuse; test CSRF e limiti ai tentativi continuano a passare.
