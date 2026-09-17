@@ -5,14 +5,14 @@ import { authClient } from '@/lib/auth-client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 export default function AccountPage() {
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState('')
-  return <Card className="max-w-md mx-auto">
-    <CardHeader><CardTitle>Cambia password</CardTitle></CardHeader>
-    <CardContent>
+  return <section className="mx-auto max-w-md" aria-labelledby="account-title">
+    <header className="mb-6 border-b pb-4">
+      <h1 id="account-title" className="text-2xl font-semibold">Cambia password</h1>
+    </header>
       <form className="space-y-4" onSubmit={async event => {
         event.preventDefault()
         const form = event.currentTarget
@@ -37,6 +37,5 @@ export default function AccountPage() {
         <p role="status" className="text-sm">{message}</p>
         <Button disabled={busy}>{busy ? 'Salvataggio…' : 'Aggiorna password'}</Button>
       </form>
-    </CardContent>
-  </Card>
+  </section>
 }

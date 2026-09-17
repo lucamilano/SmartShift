@@ -124,14 +124,14 @@ export default function CalendarClient({
     const existingEvent = events.find(e => e.data === dayStr)
     
     if (existingEvent) {
-      showAlert('Giorno Occupato', "C'è già un evento inserito in questa data. Clicca sul cestino per rimuoverlo.")
+      showAlert('Giorno già pianificato', "C'è già un evento in questa data. Rimuovilo prima di inserirne un altro.")
       return
     }
 
     const isHoliday = getItalianHoliday(day)
     if (isHoliday) {
       showConfirm(
-        'Attenzione: Giorno Festivo', 
+        'Giorno festivo',
         `Il giorno selezionato è ${isHoliday}. Vuoi davvero inserire un evento in un giorno festivo?`,
         () => {
           setSelectedDate(day)
@@ -141,7 +141,7 @@ export default function CalendarClient({
       return
     } else if (isWeekend(day)) {
       showConfirm(
-        'Attenzione: Fine Settimana', 
+        'Fine settimana',
         `Il giorno selezionato è il weekend (${getDay(day) === 6 ? 'Sabato' : 'Domenica'}). Vuoi davvero inserire un evento?`,
         () => {
           setSelectedDate(day)
@@ -164,7 +164,7 @@ export default function CalendarClient({
     setLoading(false)
     
     if (res.error) {
-      showAlert('Errore di Salvataggio', res.error)
+      showAlert('Salvataggio non riuscito', res.error)
     } else {
       setIsModalOpen(false)
       // Ricarichiamo in tempo reale
@@ -182,7 +182,7 @@ export default function CalendarClient({
     if (!res.error) {
       setEvents(events.filter(ev => ev.id !== id))
     } else {
-      showAlert('Errore Cancellazione', res.error)
+      showAlert('Rimozione non riuscita', res.error)
     }
   }
 
@@ -201,10 +201,10 @@ export default function CalendarClient({
           {format(currentMonth, 'MMMM yyyy', { locale: it })}
         </h2>
         <div className="flex gap-2">
-          <Button variant="outline" size="icon" onClick={prevMonth} aria-label="Mese precedente" className="h-10 w-10 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">
+          <Button variant="outline" size="icon" onClick={prevMonth} aria-label="Mese precedente">
             <ChevronLeft className="h-5 w-5" />
           </Button>
-          <Button variant="outline" size="icon" onClick={nextMonth} aria-label="Mese successivo" className="h-10 w-10 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">
+          <Button variant="outline" size="icon" onClick={nextMonth} aria-label="Mese successivo">
             <ChevronRight className="h-5 w-5" />
           </Button>
         </div>
@@ -258,14 +258,14 @@ export default function CalendarClient({
                   min-h-20 sm:min-h-24 p-1.5 sm:p-2 rounded-sm border transition-colors relative flex flex-col group cursor-pointer overflow-hidden
                   ${today ? 'border-blue-500 bg-blue-50/30 dark:bg-blue-950/20'
                     : holidayName && !dayEvent ? 'border-red-200 dark:border-red-900/50 bg-red-50/30 dark:bg-red-900/20' 
-                    : weekend && !dayEvent ? 'border-gray-300 dark:border-slate-700 bg-gray-100/60 dark:bg-slate-800/40' 
-                    : 'border-border bg-background hover:border-gray-400 dark:hover:border-slate-600'}
+                    : weekend && !dayEvent ? 'border-border bg-muted/60'
+                    : 'border-border bg-background hover:border-foreground/40'}
                 `}
               >
                 {/* Etichetta del Giorno */}
                 <span className={`
                   inline-flex items-center justify-center w-6 h-6 md:w-7 md:h-7 text-xs md:text-sm font-semibold rounded-full mb-1
-                  ${today ? 'bg-blue-600 dark:bg-blue-500 text-white' : 'text-gray-700 dark:text-gray-300'}
+                  ${today ? 'bg-blue-600 dark:bg-blue-500 text-white' : 'text-foreground'}
                 `}>
                   {format(day, 'd')}
                 </span>
@@ -274,7 +274,7 @@ export default function CalendarClient({
                 {dayEvent ? (
                   <div className={`
                     mt-auto p-1.5 rounded-sm border flex flex-col relative
-                    ${TYPE_COLORS[dayEvent.tipo] || 'bg-gray-100'}
+                    ${TYPE_COLORS[dayEvent.tipo] || 'bg-muted'}
                   `}>
                     <span className="text-xs font-semibold leading-tight truncate">
                       {TYPE_LABELS[dayEvent.tipo] || dayEvent.tipo}
@@ -286,7 +286,7 @@ export default function CalendarClient({
                     {/* Bottone Cancella (Appare solo quando passi col mouse) */}
                     <button 
                       onClick={(e) => handleDelete(dayEvent.id, e)}
-                      className="absolute -top-1.5 -right-1.5 bg-background rounded-sm p-1 border text-red-600 dark:text-red-400 md:opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50 dark:hover:bg-red-950"
+                      className="absolute -top-1.5 -right-1.5 rounded-sm border bg-background p-1 text-destructive transition-opacity hover:bg-destructive/10 md:opacity-0 group-hover:opacity-100"
                       title="Rimuovi"
                       aria-label={`Rimuovi ${TYPE_LABELS[dayEvent.tipo] || dayEvent.tipo} del ${format(day, 'd MMMM yyyy', { locale: it })}`}
                     >
@@ -327,7 +327,7 @@ export default function CalendarClient({
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-xl">Inserisci Presenza</DialogTitle>
+            <DialogTitle className="text-xl">Inserisci presenza</DialogTitle>
             <DialogDescription>
               Stai pianificando per il <strong>{selectedDate ? format(selectedDate, 'd MMMM yyyy', { locale: it }) : ''}</strong>.
             </DialogDescription>
@@ -335,7 +335,7 @@ export default function CalendarClient({
           
           <div className="space-y-6 py-4">
             <div className="space-y-3">
-              <Label className="text-sm font-semibold text-gray-700">Tipo di attività</Label>
+              <Label>Tipo di attività</Label>
               <Select value={eventType} onValueChange={setEventType}>
                 <SelectTrigger className="h-12 text-base">
                   <SelectValue placeholder="Seleziona..." />
@@ -350,14 +350,14 @@ export default function CalendarClient({
             </div>
 
             <div className="space-y-3">
-              <Label className="text-sm font-semibold text-gray-700">Durata</Label>
+              <Label>Durata</Label>
               <Select value={isHalfDay} onValueChange={(val: 'true' | 'false') => setIsHalfDay(val)}>
                 <SelectTrigger className="h-12 text-base">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="false">Giornata Intera</SelectItem>
-                  <SelectItem value="true">Mezza Giornata</SelectItem>
+                  <SelectItem value="false">Giornata intera</SelectItem>
+                  <SelectItem value="true">Mezza giornata</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -365,7 +365,7 @@ export default function CalendarClient({
           
           <DialogFooter className="gap-2 sm:gap-0">
             <Button variant="ghost" onClick={() => setIsModalOpen(false)}>Annulla</Button>
-            <Button onClick={handleCreate} disabled={loading} className="bg-blue-600 hover:bg-blue-700">
+            <Button onClick={handleCreate} disabled={loading}>
               {loading ? 'Salvataggio...' : 'Conferma'}
             </Button>
           </DialogFooter>
@@ -389,9 +389,9 @@ export default function CalendarClient({
                   alertConfig.onConfirm()
                 }
               }}
-              className={alertConfig.isConfirm ? "bg-amber-600 hover:bg-amber-700" : "bg-blue-600 hover:bg-blue-700"}
+              className={alertConfig.isConfirm ? "bg-amber-600 text-white hover:bg-amber-700" : undefined}
             >
-              {alertConfig.isConfirm ? 'Procedi ugualmente' : 'Ho Capito'}
+              {alertConfig.isConfirm ? 'Procedi ugualmente' : 'Ho capito'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

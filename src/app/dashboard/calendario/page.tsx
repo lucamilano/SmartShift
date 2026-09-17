@@ -28,12 +28,12 @@ export default async function CalendarioPage({ searchParams }: { searchParams: P
     <div className="max-w-5xl mx-auto space-y-6">
       <header>
         <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-          {targetUserName ? `Calendario di ${targetUserName}` : 'Il Mio Calendario'}
+          {targetUserName ? `Calendario di ${targetUserName}` : 'Il mio calendario'}
         </h1>
         <p className="mt-2 max-w-3xl text-sm text-muted-foreground sm:text-base">
           {targetUserName 
-            ? 'Stai agendo come Amministratore per questo collega. Modifica i giorni o inserisci nuove presenze.' 
-            : 'Seleziona un giorno per inserire una presenza. Usa il cestino sull’evento per rimuoverlo.'}
+            ? 'Stai modificando la pianificazione di questo collega.'
+            : 'Seleziona un giorno per aggiungere una presenza; usa il cestino per rimuoverla.'}
         </p>
       </header>
 

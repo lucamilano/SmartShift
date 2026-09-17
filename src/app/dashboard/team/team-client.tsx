@@ -37,6 +37,25 @@ type Event = {
   tipo: string
 }
 
+const STATUS_STYLES: Record<string, string> = {
+  ufficio: 'text-green-700 dark:text-green-400',
+  smartworking: 'text-blue-700 dark:text-blue-400',
+  ferie: 'text-yellow-700 dark:text-yellow-400',
+  malattia: 'text-red-700 dark:text-red-400',
+}
+
+const STATUS_LABELS: Record<string, string> = {
+  ufficio: 'Ufficio',
+  smartworking: 'Smartworking',
+  ferie: 'Ferie',
+  malattia: 'Malattia',
+}
+
+function TodayStatus({ event }: { event?: Event }) {
+  if (!event) return <span className="text-sm text-muted-foreground">Nessun evento</span>
+  return <span className={`text-sm font-medium ${STATUS_STYLES[event.tipo] || ''}`}>{STATUS_LABELS[event.tipo] || event.tipo}</span>
+}
+
 export default function TeamClient({ initialMembers, todaysEvents, stats }: { initialMembers: Member[], todaysEvents: Event[], stats: Record<'ufficio' | 'smartworking' | 'ferie' | 'malattia' | 'assenti_non_giustificati', number> }) {
   const [members, setMembers] = useState<Member[]>(initialMembers)
   
@@ -175,34 +194,24 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
         </div>
         <div>
           {/* Visualizzazione Mobile (Lista a schede compatte) */}
-          <div className="md:hidden flex flex-col divide-y divide-gray-100 dark:divide-slate-800">
+          <div className="flex flex-col divide-y md:hidden">
             {members.map((member) => {
               const todayStatus = todaysEvents.find(e => e.utente_id === member.id)
-              let statusLabel = <span className="text-sm text-muted-foreground">Nessun evento</span>
-              
-              if (todayStatus) {
-                switch(todayStatus.tipo) {
-                  case 'ufficio': statusLabel = <span className="text-sm font-medium text-green-700 dark:text-green-400">Ufficio</span>; break;
-                  case 'smartworking': statusLabel = <span className="text-sm font-medium text-blue-700 dark:text-blue-400">Smartworking</span>; break;
-                  case 'ferie': statusLabel = <span className="text-sm font-medium text-yellow-700 dark:text-yellow-400">Ferie</span>; break;
-                  case 'malattia': statusLabel = <span className="text-sm font-medium text-red-700 dark:text-red-400">Malattia</span>; break;
-                }
-              }
 
               return (
                 <div key={member.id} className="p-4 flex flex-col gap-3">
                   <div className="flex justify-between items-start">
                     <div className="flex items-center gap-3">
                       <Avatar className="h-10 w-10">
-                        <AvatarFallback className="bg-gray-200 dark:bg-slate-800 text-gray-600 dark:text-slate-300 font-semibold text-sm">
+                        <AvatarFallback className="font-semibold">
                           {(member.nome?.[0] || 'U') + (member.cognome?.[0] || '')}
                         </AvatarFallback>
                       </Avatar>
                       <div>
-                        <div className="font-semibold text-gray-900 dark:text-white">{[member.nome, member.cognome].filter(Boolean).join(' ') || member.email}</div>
-                        <div className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">
+                        <div className="font-semibold">{[member.nome, member.cognome].filter(Boolean).join(' ') || member.email}</div>
+                        <div className="mt-0.5 text-xs text-muted-foreground">
                           {member.ruolo === 'admin' 
-                            ? <span className="font-medium text-blue-700 dark:text-blue-400">Amministratore</span>
+                            ? <span className="font-medium text-foreground">Amministratore</span>
                             : <span>Utente</span>
                           }
                         </div>
@@ -212,12 +221,12 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
                   </div>
                   
                   <div className="flex justify-between items-center py-1">
-                    <span className="text-xs text-gray-500 dark:text-slate-400 font-medium">Stato Oggi:</span>
-                    <div>{statusLabel}</div>
+                    <span className="text-xs font-medium text-muted-foreground">Stato oggi</span>
+                    <TodayStatus event={todayStatus} />
                   </div>
                   
-                  <div className="flex justify-end gap-2 mt-1 border-t border-gray-50 dark:border-slate-800/50 pt-3">
-                    <Button variant="outline" size="sm" asChild className="h-8 text-xs text-gray-600 dark:text-slate-300 border-gray-300 dark:border-slate-700 dark:hover:bg-slate-800 flex-1">
+                  <div className="mt-1 flex justify-end gap-2 border-t pt-3">
+                    <Button variant="outline" size="sm" asChild className="flex-1">
                       <Link href={`/dashboard/calendario?userId=${member.id}`}>
                         <CalendarDays className="h-3.5 w-3.5 mr-1" /> Calendario
                       </Link>
@@ -226,7 +235,7 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
                       variant="ghost" 
                       size="icon" 
                       onClick={() => handleEditClick(member)}
-                      className="h-8 w-8 text-blue-700 dark:text-blue-400 shrink-0"
+                      className="shrink-0"
                       aria-label="Modifica dati anagrafici"
                     >
                       <FileEdit className="h-4 w-4" />
@@ -236,7 +245,7 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
                       variant="ghost" 
                       size="icon" 
                       onClick={() => handleDeleteClick(member)}
-                      className="h-8 w-8 text-red-600 dark:text-red-400 shrink-0"
+                      className="shrink-0 text-destructive"
                       aria-label="Rimuovi account"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -251,33 +260,22 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
           <div className="hidden md:block overflow-x-auto">
             <Table>
             <TableHeader>
-              <TableRow className="dark:border-slate-800">
-                <TableHead className="w-[200px] pl-6 dark:text-slate-400">Collega</TableHead>
-                <TableHead className="dark:text-slate-400">Ruolo</TableHead>
-                <TableHead className="dark:text-slate-400">Stato Oggi</TableHead>
-                <TableHead className="text-right pr-6 dark:text-slate-400">Azioni Rapide</TableHead>
+              <TableRow>
+                <TableHead className="w-[200px] pl-6">Collega</TableHead>
+                <TableHead>Ruolo</TableHead>
+                <TableHead>Stato oggi</TableHead>
+                <TableHead className="pr-6 text-right">Azioni</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {members.map((member) => {
                 const todayStatus = todaysEvents.find(e => e.utente_id === member.id)
-                let statusLabel = <span className="text-sm text-muted-foreground">Nessun evento</span>
-                
-                if (todayStatus) {
-                  switch(todayStatus.tipo) {
-                    case 'ufficio': statusLabel = <span className="text-sm font-medium text-green-700 dark:text-green-400">Ufficio</span>; break;
-                    case 'smartworking': statusLabel = <span className="text-sm font-medium text-blue-700 dark:text-blue-400">Smartworking</span>; break;
-                    case 'ferie': statusLabel = <span className="text-sm font-medium text-yellow-700 dark:text-yellow-400">Ferie</span>; break;
-                    case 'malattia': statusLabel = <span className="text-sm font-medium text-red-700 dark:text-red-400">Malattia</span>; break;
-                  }
-                }
-
                 return (
-                  <TableRow key={member.id} className="dark:border-slate-800">
-                    <TableCell className="pl-6 font-medium dark:text-white">
+                  <TableRow key={member.id}>
+                    <TableCell className="pl-6 font-medium">
                       <div className="flex items-center gap-3">
                         <Avatar className="h-9 w-9">
-                          <AvatarFallback className="bg-gray-200 dark:bg-slate-800 text-gray-600 dark:text-slate-300 font-semibold text-xs">
+                          <AvatarFallback className="text-xs font-semibold">
                             {(member.nome?.[0] || 'U') + (member.cognome?.[0] || '')}
                           </AvatarFallback>
                         </Avatar>
@@ -286,15 +284,15 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
                     </TableCell>
                     <TableCell>
                       {member.ruolo === 'admin' 
-                        ? <span className="text-sm font-medium text-blue-700 dark:text-blue-400">Amministratore</span>
+                        ? <span className="text-sm font-medium">Amministratore</span>
                         : <span className="text-sm text-muted-foreground">Utente</span>
                       }
                       {member.must_change_password && <span className="ml-2 text-xs font-medium text-amber-700 dark:text-amber-400">Invito {member.invitation_status === 'failed' ? 'non inviato' : 'in attesa'}</span>}
                     </TableCell>
-                    <TableCell>{statusLabel}</TableCell>
+                    <TableCell><TodayStatus event={todayStatus} /></TableCell>
                     <TableCell className="text-right pr-6">
                       <div className="flex justify-end gap-2">
-                        <Button variant="outline" size="sm" asChild className="h-8 text-xs text-gray-600 dark:text-slate-300 border-gray-300 dark:border-slate-700 dark:hover:bg-slate-800">
+                        <Button variant="outline" size="sm" asChild>
                           <Link href={`/dashboard/calendario?userId=${member.id}`}>
                             <CalendarDays className="h-3.5 w-3.5 mr-1" /> Apri Calendario
                           </Link>
@@ -303,18 +301,17 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
                           variant="ghost" 
                           size="icon" 
                           onClick={() => handleEditClick(member)}
-                          className="h-8 w-8 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:bg-blue-900/50 hover:bg-blue-50" 
                           title="Modifica dati anagrafici"
                           aria-label="Modifica dati anagrafici"
                         >
                           <FileEdit className="h-4 w-4" />
                         </Button>
-                        {member.must_change_password && <Button variant="ghost" size="icon" disabled={loading} onClick={() => handleResendInvitation(member)} title="Genera una nuova password temporanea e reinvia" aria-label="Reinvia invito" className="h-8 w-8 text-amber-700 hover:bg-amber-50"><Mail className="h-4 w-4" /></Button>}
+                        {member.must_change_password && <Button variant="ghost" size="icon" disabled={loading} onClick={() => handleResendInvitation(member)} title="Genera una nuova password temporanea e reinvia" aria-label="Reinvia invito" className="text-amber-700"><Mail className="h-4 w-4" /></Button>}
                         <Button 
                           variant="ghost" 
                           size="icon" 
                           onClick={() => handleDeleteClick(member)}
-                          className="h-8 w-8 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:bg-red-900/50 hover:bg-red-50" 
+                          className="text-destructive"
                           title="Rimuovi account"
                           aria-label="Rimuovi account"
                         >
@@ -409,7 +406,7 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
               <p>{alertMessage}</p>
               {temporaryPassword && <div className="mt-4 rounded-md border border-amber-300 bg-amber-50 p-3 text-amber-950 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-100">
                 <p className="font-medium">Password temporanea da consegnare con un canale sicuro</p>
-                <code className="mt-2 block break-all rounded bg-white p-2 font-mono text-sm dark:bg-slate-900">{temporaryPassword}</code>
+                <code className="mt-2 block break-all rounded bg-background p-2 font-mono text-sm">{temporaryPassword}</code>
                 <p className="mt-2 text-xs">È visibile soltanto ora e verrà sostituita obbligatoriamente al primo accesso.</p>
               </div>}
             </AlertDialogDescription>

@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { authClient } from '@/lib/auth-client'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
@@ -13,13 +12,11 @@ export default function LoginForm() {
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-2xl">SmartShift</CardTitle>
-          <CardDescription>Accedi con la tua email e password.</CardDescription>
-        </CardHeader>
-        <CardContent>
+    <main className="flex min-h-screen items-center justify-center px-5 py-10">
+      <section className="w-full max-w-sm" aria-labelledby="login-title">
+        <header className="mb-7">
+          <h1 id="login-title" className="text-2xl font-semibold">Accedi a SmartShift</h1>
+        </header>
           <form className="space-y-5" onSubmit={async event => {
             event.preventDefault()
             setBusy(true)
@@ -57,8 +54,7 @@ export default function LoginForm() {
             <Button className="w-full" disabled={busy}>{busy ? 'Accesso in corso…' : 'Accedi'}</Button>
             <p className="text-xs text-muted-foreground">Se hai dimenticato la password, contatta l’amministratore per ripristinare l’accesso.</p>
           </form>
-        </CardContent>
-      </Card>
-    </div>
+      </section>
+    </main>
   )
 }

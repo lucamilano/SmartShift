@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { authClient } from '@/lib/auth-client'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
@@ -13,13 +12,12 @@ export default function FirstAccessForm({ email, expired }: { email: string; exp
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState('')
   async function logout() { await authClient.signOut(); router.replace('/login'); router.refresh() }
-  return <div className="flex min-h-screen items-center justify-center bg-background p-4">
-    <Card className="w-full max-w-md">
-      <CardHeader>
-        <CardTitle>Completa il primo accesso</CardTitle>
-        <CardDescription>{email}</CardDescription>
-      </CardHeader>
-      <CardContent>
+  return <main className="flex min-h-screen items-center justify-center px-5 py-10">
+    <section className="w-full max-w-sm" aria-labelledby="first-access-title">
+      <header className="mb-7">
+        <h1 id="first-access-title" className="text-xl font-semibold">Completa il primo accesso</h1>
+        <p className="mt-2 text-sm text-muted-foreground">{email}</p>
+      </header>
         {expired ? <div className="space-y-4">
           <p className="text-sm text-red-600 dark:text-red-400">La password temporanea è scaduta. Chiedi all’amministratore di reinviare l’invito.</p>
           <Button className="w-full" onClick={logout}>Torna al login</Button>
@@ -44,7 +42,6 @@ export default function FirstAccessForm({ email, expired }: { email: string; exp
           {message && <p role="alert" className="text-sm text-red-600 dark:text-red-400">{message}</p>}
           <Button className="w-full" disabled={busy}>{busy ? 'Salvataggio…' : 'Imposta nuova password'}</Button>
         </form>}
-      </CardContent>
-    </Card>
-  </div>
+    </section>
+  </main>
 }

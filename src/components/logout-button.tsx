@@ -22,7 +22,7 @@ export function LogoutButton() {
           router.refresh()
         } catch { setError('Riprova a uscire.'); setBusy(false) }
       }}><LogOut className="h-5 w-5" /></Button>
-      {error && <span role="alert" className="text-xs text-red-600">{error}</span>}
+      {error && <span role="alert" className="text-xs text-destructive">{error}</span>}
     </div>
   )
 }

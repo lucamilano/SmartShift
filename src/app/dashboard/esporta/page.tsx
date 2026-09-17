@@ -91,15 +91,15 @@ export default function ExportPage() {
         </div>
       </section>
       
-      <section className="border-t pt-5" aria-labelledby="legend-title">
+      <section aria-labelledby="legend-title">
         <h2 id="legend-title" className="text-sm font-medium">
           Legenda del file
         </h2>
         <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2">
-          <div className="flex items-center"><div className="w-4 h-4 rounded-sm bg-[#4A86E8] border border-gray-400 dark:border-slate-600 mr-2"></div><span className="text-sm text-gray-700 dark:text-slate-300 font-medium">Smartworking</span></div>
-          <div className="flex items-center"><div className="w-4 h-4 rounded-sm bg-[#FFFF00] border border-gray-400 dark:border-slate-600 mr-2"></div><span className="text-sm text-gray-700 dark:text-slate-300 font-medium">Ferie</span></div>
-          <div className="flex items-center"><div className="w-4 h-4 rounded-sm bg-[#FF0000] border border-gray-400 dark:border-slate-600 mr-2"></div><span className="text-sm text-gray-700 dark:text-slate-300 font-medium">Malattia</span></div>
-          <div className="flex items-center"><div className="w-4 h-4 rounded-sm bg-[#32CD32] border border-gray-400 dark:border-slate-600 mr-2"></div><span className="text-sm text-gray-700 dark:text-slate-300 font-medium">In Ufficio</span></div>
+          <div className="flex items-center"><span className="mr-2 size-4 border bg-[#4A86E8]" aria-hidden="true" /><span className="text-sm font-medium">Smartworking</span></div>
+          <div className="flex items-center"><span className="mr-2 size-4 border bg-[#FFFF00]" aria-hidden="true" /><span className="text-sm font-medium">Ferie</span></div>
+          <div className="flex items-center"><span className="mr-2 size-4 border bg-[#FF0000]" aria-hidden="true" /><span className="text-sm font-medium">Malattia</span></div>
+          <div className="flex items-center"><span className="mr-2 size-4 border bg-[#32CD32]" aria-hidden="true" /><span className="text-sm font-medium">In ufficio</span></div>
         </div>
       </section>
 
