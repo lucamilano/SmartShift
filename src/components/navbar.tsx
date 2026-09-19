@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { getCurrentUser } from '@/lib/auth'
 import { LogoutButton } from '@/components/logout-button'
 import { Button } from '@/components/ui/button'
-import { Calendar, Users, FileSpreadsheet, KeyRound } from 'lucide-react'
+import { Calendar, Users, FileSpreadsheet, KeyRound, LayoutDashboard } from 'lucide-react'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { NavLink } from '@/components/nav-link'
 
@@ -19,11 +19,14 @@ export async function Navbar() {
         <div className="flex h-16 justify-between items-center">
           
           <div className="flex items-center gap-6">
-            <Link href="/dashboard/calendario" className="flex items-center gap-2.5">
+            <Link href="/dashboard" className="flex items-center gap-2.5">
               <span className="grid size-8 place-items-center bg-brand text-sm font-bold text-white" aria-hidden="true">S</span>
               <span className="text-lg font-semibold tracking-[-0.03em]">SmartShift</span>
             </Link>
-            <div className="hidden md:block"><NavLink href="/dashboard/calendario">Calendario</NavLink></div>
+            <div className="hidden items-center gap-5 md:flex">
+              <NavLink href="/dashboard" exact>Dashboard</NavLink>
+              <NavLink href="/dashboard/calendario">Calendario</NavLink>
+            </div>
           </div>
 
           <div className="flex items-center gap-2">
@@ -52,6 +55,10 @@ export async function Navbar() {
 
       {isAdmin && <div className="fixed bottom-0 left-0 right-0 z-50 border-t bg-card px-2 pb-safe shadow-[0_-8px_28px_-24px_rgba(0,0,0,.6)] md:hidden">
         <div className="flex h-16 items-center justify-around">
+          <NavLink href="/dashboard" mobile exact>
+            <LayoutDashboard className="h-5 w-5 mb-1" />
+            <span className="text-xs font-medium">Oggi</span>
+          </NavLink>
           <NavLink href="/dashboard/calendario" mobile>
             <Calendar className="h-5 w-5 mb-1" />
             <span className="text-xs font-medium">Calendario</span>

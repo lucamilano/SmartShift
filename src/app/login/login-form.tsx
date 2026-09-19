@@ -28,7 +28,11 @@ export default function LoginForm() {
                 email: String(form.get('email')).trim().toLowerCase(), password: String(form.get('password')),
               })
               if (result.error) {
-                setError(result.error.status === 429 ? 'Troppi tentativi. Attendi un minuto e riprova.' : 'Email o password non corrette.')
+                setError(result.error.status === 429
+                  ? 'Troppi tentativi. Attendi un minuto e riprova.'
+                  : result.error.status === 403
+                    ? 'Indirizzo locale non autorizzato. Apri SmartShift da http://127.0.0.1:3000 e riprova.'
+                    : 'Email o password non corrette.')
               } else {
                 const status = await fetch('/api/account-status', { cache: 'no-store' })
                 if (status.ok) {

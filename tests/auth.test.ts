@@ -9,7 +9,7 @@ const origin = 'http://localhost:3000'
 const password = 'test-password-long-and-unique'
 async function fixture() {
   const db = new DatabaseSync(':memory:')
-  for (const migration of ['0001_initial', '0002_auth', '0003_profile_auth_link', '0004_user_invitations']) {
+  for (const migration of ['0001_initial', '0002_auth', '0003_profile_auth_link', '0004_user_invitations', '0005_calendar_permission_type']) {
     db.exec(readFileSync(`migrations/${migration}.sql`, 'utf8'))
   }
   db.exec(await provisionSql('admin@example.com', password, 'admin'))

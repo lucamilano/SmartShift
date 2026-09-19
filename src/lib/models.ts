@@ -18,7 +18,7 @@ export interface CalendarEvent {
   id: string
   utente_id: string
   data: string
-  tipo: 'ferie' | 'smartworking' | 'malattia' | 'ufficio'
+  tipo: 'ferie' | 'permesso' | 'smartworking' | 'malattia' | 'ufficio'
   mezza_giornata: boolean
   stato: 'approvato'
   created_at: string

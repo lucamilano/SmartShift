@@ -74,21 +74,21 @@ export class Repository {
     return results.map(row => ({ ...row, mezza_giornata: Boolean(row.mezza_giornata) }))
   }
 
-  async othersHolidays(start: string, end: string) {
-    await this.currentProfile()
+  async othersHolidays(start: string, end: string, targetId?: string) {
+    const target = await this.target(targetId)
     validateRange(start, end)
     const { results } = await this.db.prepare(`SELECT e.data, e.tipo, trim(p.nome || ' ' || p.cognome) AS nome
       FROM eventi_calendario e JOIN profili p ON p.id = e.utente_id
-      WHERE p.is_active = 1 AND e.utente_id != ? AND e.tipo IN ('ferie', 'smartworking', 'malattia')
+      WHERE p.is_active = 1 AND e.utente_id != ? AND e.tipo IN ('ferie', 'permesso', 'smartworking', 'malattia')
       AND e.stato = 'approvato' AND e.data BETWEEN ? AND ? ORDER BY e.data`)
-      .bind(this.actorId, start, end).all<{ data: string; tipo: string; nome: string }>()
+      .bind(target.id, start, end).all<{ data: string; tipo: string; nome: string }>()
     return results
   }
 
   async addEvent(date: string, type: string, halfDay: boolean, targetId?: string) {
     const target = await this.target(targetId)
     validateDate(date)
-    if (!['ferie', 'smartworking', 'malattia', 'ufficio'].includes(type) || typeof halfDay !== 'boolean') {
+    if (!['ferie', 'permesso', 'smartworking', 'malattia', 'ufficio'].includes(type) || typeof halfDay !== 'boolean') {
       throw new UserError('Tipo di presenza non valido.')
     }
     const result = await this.db.prepare(`INSERT INTO eventi_calendario (id, utente_id, data, tipo, mezza_giornata)

@@ -18,6 +18,7 @@ export default async function TeamPage() {
   const stats = {
     ufficio: todaysEvents?.filter(e => e.tipo === 'ufficio').length || 0,
     smartworking: todaysEvents?.filter(e => e.tipo === 'smartworking').length || 0,
+    permesso: todaysEvents?.filter(e => e.tipo === 'permesso').length || 0,
     ferie: todaysEvents?.filter(e => e.tipo === 'ferie').length || 0,
     malattia: todaysEvents?.filter(e => e.tipo === 'malattia').length || 0,
     assenti_non_giustificati: (teamMembers?.filter(member => !member.must_change_password).length || 0) - (todaysEvents?.length || 0)

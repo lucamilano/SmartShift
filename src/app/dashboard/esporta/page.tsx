@@ -99,6 +99,7 @@ export default function ExportPage() {
         <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2">
           <div className="flex items-center"><span className="mr-2 size-4 border bg-[#4A86E8]" aria-hidden="true" /><span className="text-sm font-medium">Smartworking</span></div>
           <div className="flex items-center"><span className="mr-2 size-4 border bg-[#FFFF00]" aria-hidden="true" /><span className="text-sm font-medium">Ferie</span></div>
+          <div className="flex items-center"><span className="mr-2 size-4 border bg-[#A78BFA]" aria-hidden="true" /><span className="text-sm font-medium">Permesso</span></div>
           <div className="flex items-center"><span className="mr-2 size-4 border bg-[#FF0000]" aria-hidden="true" /><span className="text-sm font-medium">Malattia</span></div>
           <div className="flex items-center"><span className="mr-2 size-4 border bg-[#32CD32]" aria-hidden="true" /><span className="text-sm font-medium">In ufficio</span></div>
         </div>

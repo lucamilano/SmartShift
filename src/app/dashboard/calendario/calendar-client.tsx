@@ -37,6 +37,7 @@ type OtherHoliday = {
 const TYPE_COLORS: Record<string, string> = {
   'smartworking': 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 border-blue-200 dark:border-blue-800',
   'ferie': 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-900 dark:text-yellow-200 border-yellow-300 dark:border-yellow-800',
+  'permesso': 'bg-violet-100 dark:bg-violet-900/30 text-violet-800 dark:text-violet-300 border-violet-200 dark:border-violet-800',
   'malattia': 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 border-red-200 dark:border-red-800',
   'ufficio': 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 border-green-200 dark:border-green-800',
 }
@@ -44,6 +45,7 @@ const TYPE_COLORS: Record<string, string> = {
 const TYPE_LABELS: Record<string, string> = {
   'smartworking': 'Smartworking',
   'ferie': 'Ferie',
+  'permesso': 'Permesso',
   'malattia': 'Malattia',
   'ufficio': 'In Ufficio',
 }
@@ -100,7 +102,7 @@ export default function CalendarClient({
       
       const [myData, othersData] = await Promise.all([
         getUserEvents(start, end, targetUserId),
-        getOthersHolidays(start, end)
+        getOthersHolidays(start, end, targetUserId)
       ])
       
       setEvents(myData)
@@ -344,6 +346,7 @@ export default function CalendarClient({
                   <SelectItem value="smartworking">Smartworking</SelectItem>
                   <SelectItem value="ufficio">In ufficio</SelectItem>
                   <SelectItem value="ferie">Ferie</SelectItem>
+                  <SelectItem value="permesso">Permesso</SelectItem>
                   <SelectItem value="malattia">Malattia</SelectItem>
                 </SelectContent>
               </Select>

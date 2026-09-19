@@ -4,9 +4,9 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 
-export function NavLink({ href, children, mobile = false }: { href: string; children: React.ReactNode; mobile?: boolean }) {
+export function NavLink({ href, children, mobile = false, exact = false }: { href: string; children: React.ReactNode; mobile?: boolean; exact?: boolean }) {
   const pathname = usePathname()
-  const active = pathname === href || pathname.startsWith(`${href}/`)
+  const active = pathname === href || (!exact && pathname.startsWith(`${href}/`))
   return <Link href={href} aria-current={active ? 'page' : undefined} className={cn(
     mobile
       ? 'relative flex h-full w-full flex-col items-center justify-center gap-1 text-muted-foreground transition-colors hover:text-foreground'

@@ -9,7 +9,7 @@ import { Repository } from '../src/lib/repository'
 
 function fixture() {
   const sqlite = new DatabaseSync(':memory:')
-  for (const migration of ['0001_initial', '0002_auth', '0003_profile_auth_link', '0004_user_invitations']) {
+  for (const migration of ['0001_initial', '0002_auth', '0003_profile_auth_link', '0004_user_invitations', '0005_calendar_permission_type']) {
     sqlite.exec(readFileSync(`migrations/${migration}.sql`, 'utf8'))
   }
   sqlite.exec(`INSERT INTO "user" (id,name,email,"emailVerified","createdAt","updatedAt") VALUES ('admin','Admin','admin@example.com',1,0,0);

@@ -11,6 +11,7 @@ function fixture() {
   sqlite.exec(readFileSync('migrations/0002_auth.sql', 'utf8'))
   sqlite.exec(readFileSync('migrations/0003_profile_auth_link.sql', 'utf8'))
   sqlite.exec(readFileSync('migrations/0004_user_invitations.sql', 'utf8'))
+  sqlite.exec(readFileSync('migrations/0005_calendar_permission_type.sql', 'utf8'))
   sqlite.exec(`INSERT INTO "user" (id,name,email,"emailVerified","createdAt","updatedAt") VALUES
     ('admin','Admin','admin@example.com',1,0,0), ('alice','Alice','alice@example.com',1,0,0), ('bob','Bob','bob@example.com',1,0,0);
     INSERT INTO profili(id,email,ruolo,auth_user_id) VALUES
@@ -44,14 +45,17 @@ test('calendar CRUD, half-days, duplicates, and date validation', async () => {
   const { sqlite, alice } = fixture()
   try {
     await alice.addEvent('2026-09-17', 'ferie', true)
+    await alice.addEvent('2026-09-18', 'permesso', false)
     const events = await alice.events('2026-09-01', '2026-09-30')
-    assert.equal(events.length, 1)
+    assert.equal(events.length, 2)
     assert.equal(events[0].mezza_giornata, true)
+    assert.equal(events[1].tipo, 'permesso')
     await assert.rejects(alice.addEvent('2026-09-17', 'ufficio', false), /già un evento/)
     await assert.rejects(alice.addEvent('2026-02-30', 'ufficio', false), /Data non valida/)
     await assert.rejects(alice.addEvent('2026-09-18', 'invalid', false), /non valido/)
     await assert.rejects(alice.events('2026-09-30', '2026-09-01'), /Intervallo/)
     await alice.deleteEvent(events[0].id)
+    await alice.deleteEvent(events[1].id)
     assert.deepEqual(await alice.events('2026-09-01', '2026-09-30'), [])
   } finally { sqlite.close() }
 })
@@ -69,6 +73,7 @@ test('users cannot read/write another calendar or administer profiles/export', a
     await assert.rejects(alice.removeProfile('bob'), /permessi/)
     await assert.rejects(alice.members(), /permessi/)
     await assert.rejects(alice.teamEvents('2026-09-01', '2026-09-30'), /permessi/)
+    await assert.rejects(alice.othersHolidays('2026-09-01', '2026-09-30', 'bob'), /Non autorizzato/)
     await assert.rejects(anonymous.othersHolidays('2026-09-01', '2026-09-30'), /non autorizzato/)
     assert.equal((await bob.events('2026-09-01', '2026-09-30')).length, 1)
   } finally { sqlite.close() }
@@ -97,6 +102,28 @@ test('admins archive colleagues, remove credentials, and preserve anonymized his
     assert.equal(archived?.cognome, 'eliminato')
     assert.equal(archived?.auth_user_id, null)
     assert.equal(sqlite.prepare('SELECT count(*) AS n FROM "user" WHERE id = ?').get('alice')?.n, 0)
+  } finally { sqlite.close() }
+})
+
+test('admins can manage calendars belonging to both base users and other admins', async () => {
+  const { sqlite, admin } = fixture()
+  try {
+    await admin.updateProfile('bob', 'Bob', 'Bianchi', 'admin')
+    await admin.addEvent('2026-09-17', 'ufficio', false, 'alice')
+    await admin.addEvent('2026-09-18', 'smartworking', true, 'bob')
+
+    const [aliceEvent] = await admin.events('2026-09-01', '2026-09-30', 'alice')
+    const [bobEvent] = await admin.events('2026-09-01', '2026-09-30', 'bob')
+    assert.equal(aliceEvent.tipo, 'ufficio')
+    assert.equal(bobEvent.tipo, 'smartworking')
+    assert.equal(bobEvent.mezza_giornata, true)
+    const colleaguesVisibleFromBobCalendar = await admin.othersHolidays('2026-09-01', '2026-09-30', 'bob')
+    assert.equal(colleaguesVisibleFromBobCalendar.some(event => event.nome === 'Bob Bianchi'), false)
+
+    await admin.deleteEvent(aliceEvent.id, 'alice')
+    await admin.deleteEvent(bobEvent.id, 'bob')
+    assert.deepEqual(await admin.events('2026-09-01', '2026-09-30', 'alice'), [])
+    assert.deepEqual(await admin.events('2026-09-01', '2026-09-30', 'bob'), [])
   } finally { sqlite.close() }
 })
 

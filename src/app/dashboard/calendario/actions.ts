@@ -8,8 +8,8 @@ export async function getUserEvents(startDate: string, endDate: string, targetUs
   return (await getRepository()).events(startDate, endDate, targetUserId)
 }
 
-export async function getOthersHolidays(startDate: string, endDate: string) {
-  return (await getRepository()).othersHolidays(startDate, endDate)
+export async function getOthersHolidays(startDate: string, endDate: string, targetUserId?: string) {
+  return (await getRepository()).othersHolidays(startDate, endDate, targetUserId)
 }
 
 export async function addEvent(date: string, type: string, isHalfDay = false, targetUserId?: string) {

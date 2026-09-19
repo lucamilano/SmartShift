@@ -41,6 +41,7 @@ const STATUS_STYLES: Record<string, string> = {
   ufficio: 'text-green-700 dark:text-green-400',
   smartworking: 'text-blue-700 dark:text-blue-400',
   ferie: 'text-yellow-700 dark:text-yellow-400',
+  permesso: 'text-violet-700 dark:text-violet-400',
   malattia: 'text-red-700 dark:text-red-400',
 }
 
@@ -48,6 +49,7 @@ const STATUS_LABELS: Record<string, string> = {
   ufficio: 'Ufficio',
   smartworking: 'Smartworking',
   ferie: 'Ferie',
+  permesso: 'Permesso',
   malattia: 'Malattia',
 }
 
@@ -56,7 +58,7 @@ function TodayStatus({ event }: { event?: Event }) {
   return <span className={`text-sm font-medium ${STATUS_STYLES[event.tipo] || ''}`}>{STATUS_LABELS[event.tipo] || event.tipo}</span>
 }
 
-export default function TeamClient({ initialMembers, todaysEvents, stats }: { initialMembers: Member[], todaysEvents: Event[], stats: Record<'ufficio' | 'smartworking' | 'ferie' | 'malattia' | 'assenti_non_giustificati', number> }) {
+export default function TeamClient({ initialMembers, todaysEvents, stats }: { initialMembers: Member[], todaysEvents: Event[], stats: Record<'ufficio' | 'smartworking' | 'permesso' | 'ferie' | 'malattia' | 'assenti_non_giustificati', number> }) {
   const [members, setMembers] = useState<Member[]>(initialMembers)
   
   // Stati Modale Modifica User
@@ -178,9 +180,10 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
       {/* Panoramica di Oggi */}
       <section className="border-l-2 border-brand bg-accent/25 px-5 py-4" aria-labelledby="today-title">
         <h2 id="today-title" className="text-sm font-semibold text-brand-strong dark:text-brand">Situazione di oggi</h2>
-        <dl className="mt-3 grid grid-cols-2 gap-y-4 sm:grid-cols-3 md:grid-cols-5 md:divide-x md:divide-brand/15">
+        <dl className="mt-3 grid grid-cols-2 gap-y-4 sm:grid-cols-3 md:grid-cols-6 md:divide-x md:divide-brand/15">
           <div className="md:px-4 md:first:pl-0"><dt className="text-sm text-muted-foreground">In ufficio</dt><dd className="mt-1 text-2xl font-semibold tabular-nums text-brand-strong dark:text-brand">{stats.ufficio}</dd></div>
           <div className="md:px-4"><dt className="text-sm text-muted-foreground">Smartworking</dt><dd className="mt-1 text-2xl font-semibold tabular-nums text-brand-strong dark:text-brand">{stats.smartworking}</dd></div>
+          <div className="md:px-4"><dt className="text-sm text-muted-foreground">Permesso</dt><dd className="mt-1 text-2xl font-semibold tabular-nums">{stats.permesso}</dd></div>
           <div className="md:px-4"><dt className="text-sm text-muted-foreground">Ferie</dt><dd className="mt-1 text-2xl font-semibold tabular-nums">{stats.ferie}</dd></div>
           <div className="md:px-4"><dt className="text-sm text-muted-foreground">Malattia</dt><dd className="mt-1 text-2xl font-semibold tabular-nums">{stats.malattia}</dd></div>
           <div className="md:px-4"><dt className="text-sm text-muted-foreground">Non pianificati</dt><dd className="mt-1 text-2xl font-semibold tabular-nums text-warm-foreground">{stats.assenti_non_giustificati}</dd></div>

@@ -36,7 +36,7 @@ export async function GET(request: Request) {
   const workbook = new ExcelJS.Workbook()
   const sheet = workbook.addWorksheet(format(targetDate, 'MMMM yyyy', { locale: it }), {
     properties: { tabColor: { argb: 'FF4F81BD' } },
-    views: [{ state: 'frozen', xSplit: 2, ySplit: 6 }] // Fissa le colonne dei nomi e la riga delle date (Riga 6)
+    views: [{ state: 'frozen', xSplit: 2, ySplit: 7 }] // Fissa le colonne dei nomi e la riga delle date
   })
 
   // === CREAZIONE LEGENDA ===
@@ -45,6 +45,7 @@ export async function GET(request: Request) {
     { label: 'ferie', color: 'FFFFFF00' },    // Giallo
     { label: 'malattia', color: 'FFFF0000' }, // Rosso
     { label: 'sede', color: 'FF32CD32' },     // Verde (ufficio)
+    { label: 'permesso', color: 'FFA78BFA' }, // Viola
   ]
 
   // Disegno la legenda in alto a sinistra a partire dalla riga 2
@@ -65,12 +66,12 @@ export async function GET(request: Request) {
   sheet.getColumn(1).width = 4  // Colore legenda
   sheet.getColumn(2).width = 25 // Nomi e Testo Legenda
   
-  for (let i = 1; i <= 5; i++) {
+  for (let i = 1; i <= 6; i++) {
     sheet.getRow(i).height = 20
   }
 
-  // === RIGA DELLE DATE (Riga 6) ===
-  const dateRowIndex = 6
+  // === RIGA DELLE DATE ===
+  const dateRowIndex = 7
   const dateStartCol = 3
 
   weekDays.forEach((day, index) => {
@@ -136,6 +137,7 @@ export async function GET(request: Request) {
         else if (userEvent.tipo === 'ferie') argbColor = legends[1].color
         else if (userEvent.tipo === 'malattia') argbColor = legends[2].color
         else if (userEvent.tipo === 'ufficio') argbColor = legends[3].color
+        else if (userEvent.tipo === 'permesso') argbColor = legends[4].color
         
         // Se è mezza giornata potremmo indicarlo in qualche modo, per semplicità nel colore mettiamo '½' come testo
         if (userEvent.mezza_giornata) {
