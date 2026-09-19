@@ -4,9 +4,9 @@ import { useState, useEffect } from 'react'
 import { startOfMonth, endOfMonth, eachDayOfInterval, format, isToday, addMonths, subMonths, getDay, isWeekend } from 'date-fns'
 import { it } from 'date-fns/locale'
 import { getItalianHoliday } from '@/utils/holidays'
-import { BriefcaseBusiness, ChevronLeft, ChevronRight, Clock3, HeartPulse, Home, Plane, ShieldCheck, Trash2, Users } from 'lucide-react'
+import { BriefcaseBusiness, CalendarPlus, Check, ChevronLeft, ChevronRight, Clock3, HeartPulse, Home, Plane, ShieldCheck, Trash2, Users, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { addEvent, deleteEvent, getUserEvents, getTeamSchedule } from './actions'
+import { addEvents, deleteEvent, getUserEvents, getTeamSchedule } from './actions'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog'
 import {
   AlertDialog,
@@ -54,8 +54,8 @@ const TYPE_LABELS: Record<string, string> = {
 }
 
 const EVENT_OPTIONS = [
-  { value: 'smartworking', label: 'Smartworking', note: 'Lavoro da remoto', icon: Home, color: 'text-blue-700 dark:text-blue-300', selected: 'border-blue-500 bg-blue-50 dark:bg-blue-950/40' },
   { value: 'ufficio', label: 'In ufficio', note: 'Presenza in sede', icon: BriefcaseBusiness, color: 'text-emerald-700 dark:text-emerald-300', selected: 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40' },
+  { value: 'smartworking', label: 'Smartworking', note: 'Lavoro da remoto', icon: Home, color: 'text-blue-700 dark:text-blue-300', selected: 'border-blue-500 bg-blue-50 dark:bg-blue-950/40' },
   { value: 'permesso', label: 'Permesso', note: 'Assenza autorizzata', icon: Clock3, color: 'text-violet-700 dark:text-violet-300', selected: 'border-violet-500 bg-violet-50 dark:bg-violet-950/40' },
   { value: 'ferie', label: 'Ferie', note: 'Giornata di ferie', icon: Plane, color: 'text-amber-700 dark:text-amber-300', selected: 'border-amber-500 bg-amber-50 dark:bg-amber-950/40' },
   { value: 'malattia', label: 'Malattia', note: 'Assenza per malattia', icon: HeartPulse, color: 'text-red-700 dark:text-red-300', selected: 'border-red-500 bg-red-50 dark:bg-red-950/40' },
@@ -76,6 +76,8 @@ export default function CalendarClient({
   const [events, setEvents] = useState<Event[]>(initialEvents)
   const [teamSchedule, setTeamSchedule] = useState<TeamScheduleEntry[]>(initialTeamSchedule)
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
+  const [selectedDates, setSelectedDates] = useState<string[]>([])
+  const [isMultiSelecting, setIsMultiSelecting] = useState(false)
   const [teamDetailDate, setTeamDetailDate] = useState<Date | null>(null)
   
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -136,6 +138,15 @@ export default function CalendarClient({
   const handleDayClick = (day: Date) => {
     const dayStr = format(day, 'yyyy-MM-dd')
     const existingEvent = events.find(e => e.data === dayStr)
+
+    if (isMultiSelecting) {
+      if (existingEvent) {
+        showAlert('Giorno già pianificato', 'Puoi selezionare solo giorni ancora liberi.')
+        return
+      }
+      setSelectedDates(current => current.includes(dayStr) ? current.filter(date => date !== dayStr) : [...current, dayStr])
+      return
+    }
     
     if (existingEvent) {
       showAlert('Giorno già pianificato', "C'è già un evento in questa data. Rimuovilo prima di inserirne un altro.")
@@ -171,16 +182,20 @@ export default function CalendarClient({
 
   // Esegue l'azione di salvataggio
   const handleCreate = async () => {
-    if (!selectedDate) return
+    const dates = selectedDates.length > 0
+      ? [...selectedDates].sort()
+      : selectedDate ? [format(selectedDate, 'yyyy-MM-dd')] : []
+    if (dates.length === 0) return
     setLoading(true)
-    const dateStr = format(selectedDate, 'yyyy-MM-dd')
-    const res = await addEvent(dateStr, eventType, isHalfDay === 'true', targetUserId)
+    const res = await addEvents(dates, eventType, isHalfDay === 'true', targetUserId)
     setLoading(false)
     
     if (res.error) {
       showAlert('Salvataggio non riuscito', res.error)
     } else {
       setIsModalOpen(false)
+      setSelectedDates([])
+      setIsMultiSelecting(false)
       // Ricarichiamo in tempo reale
       const start = format(startOfMonth(currentMonth), 'yyyy-MM-dd')
       const end = format(endOfMonth(currentMonth), 'yyyy-MM-dd')
@@ -215,11 +230,24 @@ export default function CalendarClient({
       )}
 
       {/* Intestazione Mese */}
-      <div className="flex items-center justify-between border-b border-brand/15 bg-accent/35 p-4 sm:px-5">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-brand/15 bg-accent/35 p-4 sm:px-5">
         <h2 className="text-xl font-semibold capitalize tracking-[-0.02em]">
           {format(currentMonth, 'MMMM yyyy', { locale: it })}
         </h2>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2">
+          <Button variant={isMultiSelecting ? 'default' : 'outline'} onClick={() => {
+            if (isMultiSelecting) {
+              setSelectedDates([])
+              setIsMultiSelecting(false)
+            } else {
+              setSelectedDate(null)
+              setSelectedDates([])
+              setIsMultiSelecting(true)
+            }
+          }} className="gap-2 px-3">
+            {isMultiSelecting ? <X className="size-4" /> : <CalendarPlus className="size-4" />}
+            <span>{isMultiSelecting ? 'Annulla' : 'Più giorni'}</span>
+          </Button>
           <Button variant="outline" size="icon" onClick={prevMonth} aria-label="Mese precedente">
             <ChevronLeft className="h-5 w-5" />
           </Button>
@@ -255,6 +283,7 @@ export default function CalendarClient({
           {days.map((day) => {
             const dayStr = format(day, 'yyyy-MM-dd')
             const dayEvent = events.find(e => e.data === dayStr)
+            const isSelected = selectedDates.includes(dayStr)
             const today = isToday(day)
             const holidayName = getItalianHoliday(day)
             const weekend = isWeekend(day)
@@ -272,10 +301,12 @@ export default function CalendarClient({
                 }}
                 role="button"
                 tabIndex={0}
-                aria-label={`${format(day, 'd MMMM yyyy', { locale: it })}${dayEvent ? `, ${TYPE_LABELS[dayEvent.tipo] || dayEvent.tipo}` : ''}`}
+                aria-pressed={isMultiSelecting ? isSelected : undefined}
+                aria-label={`${format(day, 'd MMMM yyyy', { locale: it })}${dayEvent ? `, ${TYPE_LABELS[dayEvent.tipo] || dayEvent.tipo}` : ''}${isSelected ? ', selezionato' : ''}`}
                 className={`
                   min-h-20 sm:min-h-24 p-1.5 sm:p-2 rounded-sm border transition-colors relative flex flex-col group cursor-pointer overflow-hidden
-                  ${today ? 'border-blue-500 bg-blue-50/30 dark:bg-blue-950/20'
+                  ${isSelected ? 'border-brand bg-accent ring-2 ring-brand ring-offset-1 dark:ring-offset-background'
+                    : today ? 'border-blue-500 bg-blue-50/30 dark:bg-blue-950/20'
                     : holidayName && !dayEvent ? 'border-red-200 dark:border-red-900/50 bg-red-50/30 dark:bg-red-900/20' 
                     : weekend && !dayEvent ? 'border-border bg-muted/60'
                     : 'border-border bg-background hover:border-foreground/40'}
@@ -288,6 +319,12 @@ export default function CalendarClient({
                 `}>
                   {format(day, 'd')}
                 </span>
+
+                {isSelected && (
+                  <span className="absolute right-1 top-1 grid size-6 place-items-center rounded-full bg-brand text-brand-foreground shadow-sm" aria-hidden="true">
+                    <Check className="size-4" />
+                  </span>
+                )}
                 
                 {/* Contenuto del Giorno: L'Evento */}
                 {dayEvent ? (
@@ -325,7 +362,7 @@ export default function CalendarClient({
                 ) : null}
 
                 {/* Quadro giornaliero del team */}
-                {scheduledPeople.length > 0 && (
+                {scheduledPeople.length > 0 && !isMultiSelecting && (
                   <button
                     type="button"
                     onClick={(event) => { event.stopPropagation(); setTeamDetailDate(day) }}
@@ -343,6 +380,19 @@ export default function CalendarClient({
           })}
         </div>
       </div>
+
+      {isMultiSelecting && (
+        <div className="fixed inset-x-3 bottom-3 z-40 mx-auto flex max-w-xl items-center gap-3 border border-brand/25 bg-card/95 p-3 shadow-[0_18px_55px_-18px_rgba(13,70,66,.5)] backdrop-blur sm:bottom-5 sm:p-4">
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-semibold">{selectedDates.length === 0 ? 'Seleziona i giorni' : `${selectedDates.length} ${selectedDates.length === 1 ? 'giorno selezionato' : 'giorni selezionati'}`}</p>
+            <p className="truncate text-xs text-muted-foreground">Tocca i giorni liberi per aggiungerli o rimuoverli.</p>
+          </div>
+          <Button variant="ghost" size="sm" onClick={() => { setSelectedDates([]); setIsMultiSelecting(false) }}>Annulla</Button>
+          <Button size="sm" disabled={selectedDates.length === 0} onClick={() => { setSelectedDate(null); setIsModalOpen(true) }}>
+            Continua
+          </Button>
+        </div>
+      )}
 
       <Dialog open={Boolean(teamDetailDate)} onOpenChange={(open) => { if (!open) setTeamDetailDate(null) }}>
         <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-lg">
@@ -375,24 +425,54 @@ export default function CalendarClient({
           <DialogHeader>
             <div className="border-b border-brand/15 bg-accent/30 px-5 py-5 sm:px-6">
               <p className="page-kicker">Nuova pianificazione</p>
-              <DialogTitle className="text-2xl capitalize">{selectedDate ? format(selectedDate, 'EEEE d MMMM', { locale: it }) : ''}</DialogTitle>
-              <DialogDescription className="mt-2">{targetUserName ? `Turno per ${targetUserName}` : 'Scegli attività e durata della giornata.'}</DialogDescription>
+              <DialogTitle className="text-2xl capitalize">{selectedDates.length > 0 ? `${selectedDates.length} ${selectedDates.length === 1 ? 'giorno selezionato' : 'giorni selezionati'}` : selectedDate ? format(selectedDate, 'EEEE d MMMM', { locale: it }) : ''}</DialogTitle>
+              <DialogDescription className="mt-2">{targetUserName ? `Applica la pianificazione a ${targetUserName}.` : selectedDates.length > 1 ? 'La stessa pianificazione sarà applicata a tutti i giorni.' : 'Scegli attività e durata della giornata.'}</DialogDescription>
             </div>
           </DialogHeader>
 
           <div className="space-y-7 px-5 py-5 sm:px-6">
+            {selectedDates.length > 0 && (
+              <div className="border-l-2 border-brand bg-accent/25 px-3 py-3">
+                <p className="mb-2 text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">Date incluse</p>
+                <div className="flex gap-2 overflow-x-auto pb-1" aria-label="Date selezionate">
+                  {[...selectedDates].sort().map(date => (
+                    <span key={date} className="shrink-0 border border-brand/20 bg-card px-2.5 py-1.5 text-xs font-semibold capitalize">
+                      {format(new Date(`${date}T12:00:00`), 'EEE d MMM', { locale: it })}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <fieldset>
               <legend className="text-sm font-semibold">Come sarà organizzata la giornata?</legend>
-              <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2" role="radiogroup">
-                {EVENT_OPTIONS.map(option => {
-                  const Icon = option.icon
-                  const selected = eventType === option.value
-                  return <button key={option.value} type="button" role="radio" aria-checked={selected} onClick={() => setEventType(option.value)} className={`flex min-h-16 items-center gap-3 border p-3 text-left transition-[border-color,background-color] ${selected ? option.selected : 'bg-card hover:border-brand/40 hover:bg-accent/20'} ${option.value === 'malattia' ? 'sm:col-span-2' : ''}`}>
-                    <Icon className={`size-5 shrink-0 ${option.color}`} aria-hidden="true" />
-                    <span className="min-w-0"><span className="block text-sm font-semibold">{option.label}</span><span className="block text-xs text-muted-foreground">{option.note}</span></span>
-                    {selected && <ShieldCheck className="ml-auto size-4 shrink-0 text-brand" aria-hidden="true" />}
-                  </button>
-                })}
+              <div className="mt-3 space-y-4" role="radiogroup">
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  {EVENT_OPTIONS.slice(0, 2).map(option => {
+                    const Icon = option.icon
+                    const selected = eventType === option.value
+                    return <button key={option.value} type="button" role="radio" aria-checked={selected} onClick={() => setEventType(option.value)} className={`flex min-h-24 items-center gap-4 border-2 p-4 text-left transition-[border-color,background-color,box-shadow] ${selected ? `${option.selected} shadow-sm` : 'bg-card hover:border-brand/40 hover:bg-accent/20'}`}>
+                      <span className={`grid size-11 shrink-0 place-items-center rounded-full bg-background/80 ${option.color}`}><Icon className="size-6" aria-hidden="true" /></span>
+                      <span className="min-w-0"><span className="block text-base font-semibold">{option.label}</span><span className="block text-xs text-muted-foreground">{option.note}</span></span>
+                      {selected && <ShieldCheck className="ml-auto size-5 shrink-0 text-brand" aria-hidden="true" />}
+                    </button>
+                  })}
+                </div>
+
+                <div>
+                  <p className="mb-2 text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">Altre opzioni</p>
+                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                    {EVENT_OPTIONS.slice(2).map(option => {
+                      const Icon = option.icon
+                      const selected = eventType === option.value
+                      return <button key={option.value} type="button" role="radio" aria-checked={selected} onClick={() => setEventType(option.value)} className={`flex min-h-14 items-center gap-2.5 border p-3 text-left transition-[border-color,background-color] ${selected ? option.selected : 'bg-card hover:border-brand/40 hover:bg-accent/20'}`}>
+                        <Icon className={`size-4 shrink-0 ${option.color}`} aria-hidden="true" />
+                        <span className="min-w-0"><span className="block text-sm font-semibold">{option.label}</span><span className="hidden text-xs text-muted-foreground lg:block">{option.note}</span></span>
+                        {selected && <ShieldCheck className="ml-auto size-4 shrink-0 text-brand" aria-hidden="true" />}
+                      </button>
+                    })}
+                  </div>
+                </div>
               </div>
             </fieldset>
 
@@ -406,7 +486,7 @@ export default function CalendarClient({
 
             <div className="flex items-center justify-between gap-4 border-l-2 border-brand bg-accent/25 px-4 py-3 text-sm">
               <span className="text-muted-foreground">Riepilogo</span>
-              <strong className="text-right">{TYPE_LABELS[eventType]} · {isHalfDay === 'true' ? 'Mezza giornata' : 'Giornata intera'}</strong>
+              <strong className="text-right">{TYPE_LABELS[eventType]} · {isHalfDay === 'true' ? 'Mezza giornata' : 'Giornata intera'}{selectedDates.length > 1 ? ` · ${selectedDates.length} giorni` : ''}</strong>
             </div>
           </div>
 

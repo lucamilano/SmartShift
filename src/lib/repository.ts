@@ -101,15 +101,30 @@ export class Repository {
   }
 
   async addEvent(date: string, type: string, halfDay: boolean, targetId?: string) {
+    await this.addEvents([date], type, halfDay, targetId)
+  }
+
+  async addEvents(dates: string[], type: string, halfDay: boolean, targetId?: string) {
     const target = await this.target(targetId)
-    validateDate(date)
+    if (!Array.isArray(dates) || dates.length === 0 || dates.length > 31) {
+      throw new UserError('Seleziona da 1 a 31 giorni.')
+    }
+    const uniqueDates = [...new Set(dates)]
+    if (uniqueDates.length !== dates.length) throw new UserError('La selezione contiene date duplicate.')
+    uniqueDates.forEach(validateDate)
     if (!['ferie', 'permesso', 'smartworking', 'malattia', 'ufficio'].includes(type) || typeof halfDay !== 'boolean') {
       throw new UserError('Tipo di presenza non valido.')
     }
-    const result = await this.db.prepare(`INSERT INTO eventi_calendario (id, utente_id, data, tipo, mezza_giornata)
-      VALUES (?, ?, ?, ?, ?) ON CONFLICT (utente_id, data) DO NOTHING`)
-      .bind(crypto.randomUUID(), target.id, date, type, Number(halfDay)).run()
-    if (!result.meta.changes) throw new UserError('Esiste già un evento in questa data. Cancellalo prima di inserirne uno nuovo.')
+
+    const placeholders = uniqueDates.map(() => '?').join(', ')
+    const existing = await this.db.prepare(`SELECT data FROM eventi_calendario WHERE utente_id = ? AND data IN (${placeholders})`)
+      .bind(target.id, ...uniqueDates).first<{ data: string }>()
+    if (existing) throw new UserError('Una delle date selezionate contiene già un evento. Aggiorna la selezione e riprova.')
+
+    const values = uniqueDates.map(() => '(?, ?, ?, ?, ?)').join(', ')
+    const bindings = uniqueDates.flatMap(date => [crypto.randomUUID(), target.id, date, type, Number(halfDay)])
+    await this.db.prepare(`INSERT INTO eventi_calendario (id, utente_id, data, tipo, mezza_giornata) VALUES ${values}`)
+      .bind(...bindings).run()
   }
 
   async deleteEvent(eventId: string, targetId?: string) {

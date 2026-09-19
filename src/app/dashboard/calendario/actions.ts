@@ -17,9 +17,13 @@ export async function getTeamSchedule(startDate: string, endDate: string) {
 }
 
 export async function addEvent(date: string, type: string, isHalfDay = false, targetUserId?: string) {
+  return addEvents([date], type, isHalfDay, targetUserId)
+}
+
+export async function addEvents(dates: string[], type: string, isHalfDay = false, targetUserId?: string) {
   const repository = await getRepository()
   try {
-    await repository.addEvent(date, type, isHalfDay, targetUserId)
+    await repository.addEvents(dates, type, isHalfDay, targetUserId)
   } catch (error) {
     if (error instanceof UserError) return { error: error.message }
     console.error('Unable to create calendar event', error)

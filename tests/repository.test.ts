@@ -60,6 +60,22 @@ test('calendar CRUD, half-days, duplicates, and date validation', async () => {
   } finally { sqlite.close() }
 })
 
+test('multiple calendar days are created together with the same planning data', async () => {
+  const { sqlite, alice } = fixture()
+  try {
+    await alice.addEvents(['2026-09-21', '2026-09-22', '2026-09-25'], 'smartworking', false)
+    const events = await alice.events('2026-09-01', '2026-09-30')
+    assert.deepEqual(events.map(event => event.data), ['2026-09-21', '2026-09-22', '2026-09-25'])
+    assert.ok(events.every(event => event.tipo === 'smartworking' && !event.mezza_giornata))
+
+    await assert.rejects(
+      alice.addEvents(['2026-09-23', '2026-09-25'], 'ufficio', false),
+      /già un evento/,
+    )
+    assert.equal((await alice.events('2026-09-01', '2026-09-30')).length, 3)
+  } finally { sqlite.close() }
+})
+
 test('users cannot read/write another calendar or administer profiles/export', async () => {
   const { sqlite, alice, bob, anonymous } = fixture()
   try {
