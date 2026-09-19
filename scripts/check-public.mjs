@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 
-const baseURL = 'https://smartshift-164.pages.dev'
+const baseURL = 'https://smartshift.pages.dev'
 const checks = [
   ['/login', 200],
   ['/dashboard', 307],

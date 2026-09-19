@@ -61,7 +61,7 @@ La promozione ad amministratore è già implementata: va mantenuta e testata nel
 ### Invio email e reinvio
 
 - Il provider scelto per l'implementazione è Resend, tramite API HTTPS e chiave conservata nei secret Cloudflare. Il mittente applicativo è `SmartShift <noreply@smartshift.dedyn.io>`; il dominio è verificato in Resend e i relativi record DNS restano gestiti su deSEC.
-- L'indirizzo `smartshift-164.pages.dev` è l'URL del sito; non identifica automaticamente un mittente email disponibile. Definire esplicitamente il dominio e l'indirizzo da cui spedire.
+- L'indirizzo `smartshift.pages.dev` è l'URL del sito; non identifica automaticamente un mittente email disponibile. Definire esplicitamente il dominio e l'indirizzo da cui spedire.
 - Salvare eventuali chiavi come secret del Worker, mai nel browser o in Git. Non usare il token GitHub di deploy per inviare email.
 - Usare un template testuale e HTML con contenuti correttamente escapati. Password solo nel messaggio destinato al collega, mai nei log, nella risposta del form, nei file locali del Worker o in tabelle in chiaro.
 - Prevedere «Reinvia credenziali» per gli account ancora in attesa: genera una nuova password, invalida la precedente e le sessioni temporanee, aggiorna la scadenza. Non usarlo per resettare utenti già operativi senza un'azione di recupero distinta.

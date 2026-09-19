@@ -34,7 +34,7 @@ Sostituirlo ovunque con il dominio effettivamente richiesto e approvato. La stru
 | Zona DNS gestita da Cloudflare | `smartshiftapp.eu.org` |
 | Indirizzo dell'applicazione | `app.smartshiftapp.eu.org` |
 | Mittente degli inviti | `SmartShift <noreply@smartshift.dedyn.io>` |
-| Indirizzo attuale da sostituire | `https://smartshift-164.pages.dev` |
+| Indirizzo attuale da sostituire | `https://smartshift.pages.dev` |
 
 L'applicazione usa il sottodominio `app`, mentre Resend verifica il dominio principale. In questo modo il sito e il mittente sono riconoscibili, ma possono essere configurati separatamente.
 
@@ -153,7 +153,7 @@ Non creare per prima cosa un CNAME manuale. Cloudflare avverte che un record dir
 Procedere così:
 
 1. Nel dashboard Cloudflare aprire **Workers & Pages**.
-2. Selezionare il progetto Pages **`smartshift-164`**. Non selezionare il Worker backend `smartshift`.
+2. Selezionare il progetto Pages **`smartshift`**. Non selezionare il Worker backend omonimo.
 3. Aprire **Custom domains**.
 4. Selezionare **Set up a domain**.
 5. Inserire:
@@ -182,7 +182,7 @@ Verificare che:
 - non appaia un errore `522`;
 - venga mostrata la pagina di login SmartShift;
 - `/dashboard` rimandi al login quando non si è autenticati;
-- `https://smartshift-164.pages.dev` continui temporaneamente a rispondere fino al completamento della migrazione.
+- `https://smartshift.pages.dev` continui temporaneamente a rispondere fino al completamento della migrazione.
 
 Cloudflare può mostrare per il certificato gli stati **Pending Validation**, **Pending Issuance**, **Pending Deployment** e infine **Active**. Attendere lo stato Active prima di modificare l'origine usata dall'autenticazione.
 
@@ -193,7 +193,7 @@ Better Auth controlla l'origine delle richieste. Aggiungere il dominio a Pages n
 Nel file `wrangler.jsonc` occorrerà sostituire:
 
 ```json
-"APP_URL": "https://smartshift-164.pages.dev"
+"APP_URL": "https://smartshift.pages.dev"
 ```
 
 con:
@@ -427,7 +427,7 @@ Non usare il proprio amministratore principale come account di prova e non esegu
 ### Il dominio Pages mostra 522
 
 - Associare il dominio dalla sezione **Custom domains** del progetto Pages prima di creare record manuali.
-- Verificare che sia stato scelto il progetto `smartshift-164`.
+- Verificare che sia stato scelto il progetto Pages `smartshift`.
 - Controllare che non esistano record A/AAAA/CNAME concorrenti per `app`.
 - Attendere che il certificato HTTPS sia Active.
 

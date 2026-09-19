@@ -22,7 +22,7 @@ Le voci descrivono le modifiche al repository. La pipeline GitHub pubblica gli a
 ### Hosting e database
 
 - Sostituito l'hosting Vercel con Next.js su Cloudflare Workers tramite OpenNext.
-- Aggiunto l'indirizzo autonomo `smartshift-164.pages.dev` con Cloudflare Pages e collegamento privato al Worker tramite service binding.
+- Aggiunto l'indirizzo autonomo `smartshift.pages.dev` con Cloudflare Pages e collegamento privato al Worker tramite service binding.
 - Sostituito PostgreSQL/Supabase con D1 e migrazioni SQL versionate per profili, presenze, autenticazione e sessioni.
 - Disabilitati gli indirizzi pubblici e di preview del backend Workers.
 

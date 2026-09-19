@@ -2,7 +2,7 @@
 
 ## Architettura
 
-`Browser → smartshift-164.pages.dev → Pages Function → Worker smartshift → D1 smartshift-db`
+`Browser → smartshift.pages.dev → Pages Function → Worker smartshift → D1 smartshift-db`
 
 Pages fornisce un indirizzo autonomo e inoltra le richieste al Worker tramite **service binding**. Il Worker non espone un indirizzo `workers.dev` o URL di preview. Il dominio dell'app non contiene il nome degli altri progetti dell'account.
 
@@ -25,7 +25,7 @@ Nel repository non sono stati trovati usi di Supabase Storage, Realtime, Edge Fu
 
 ## Risorse
 
-- Progetto Pages: `smartshift-164`, URL `https://smartshift-164.pages.dev`.
+- Progetto Pages: `smartshift`, URL `https://smartshift.pages.dev`.
 - Worker backend: `smartshift`.
 - Database: `smartshift-db`, ID `daa4b489-b1df-488d-8e77-c66958b89de4`, località iniziale WEUR.
 - Primo amministratore: creato esplicitamente con lo script di provisioning; nessuna registrazione pubblica.
@@ -122,7 +122,7 @@ npm run deploy
 
 Il deploy può avvenire via CLI oppure con la GitHub Action descritta sotto.
 
-Per una verifica del sito reale: `node scripts/smoke-live.mjs https://smartshift-164.pages.dev PERCORSO_FILE_CREDENZIALI`. Il controllo prova login, pagine, asset, Excel e revoca della sessione senza stampare password o cookie. Il file deve contenere le credenziali attuali.
+Per una verifica del sito reale: `node scripts/smoke-live.mjs https://smartshift.pages.dev PERCORSO_FILE_CREDENZIALI`. Il controllo prova login, pagine, asset, Excel e revoca della sessione senza stampare password o cookie. Il file deve contenere le credenziali attuali.
 
 ExcelJS usa soltanto `uuid.v4`: un override a `uuid@11.1.1` corregge l'avviso della vecchia dipendenza mantenendo questa API CommonJS. Verificare l'export dopo aggiornamenti di ExcelJS.
 
