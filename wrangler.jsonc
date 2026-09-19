@@ -17,6 +17,8 @@
     "migrations_dir": "migrations"
   }],
   "vars": {
-    "APP_URL": "https://smartshift-164.pages.dev"
+    "APP_URL": "https://smartshift-164.pages.dev",
+    "EMAIL_FROM": "noreply@smartshift.dedyn.io",
+    "EMAIL_FROM_NAME": "SmartShift"
   }
 }

@@ -68,21 +68,19 @@ Nome, cognome, ruolo e rimozione si gestiscono nella pagina Team. Gli amministra
 
 Il pannello Team crea nuovi account con ruolo `user` e una password temporanea valida 24 ore. Il collega può accedere soltanto alla procedura di primo accesso finché non sceglie una password nuova. L'amministratore può poi promuoverlo ad `admin` con Modifica. «Reinvia invito» genera una nuova password, invalida quella precedente e revoca le sessioni temporanee.
 
-L'invio usa [Resend](https://resend.com/docs/api-reference/introduction). Il mittente di prova `onboarding@resend.dev` può inviare soltanto all'indirizzo associato all'account Resend. Per invitare altri colleghi bisogna [verificare un dominio](https://resend.com/docs/knowledge-base/403-error-domain-mismatch) e impostare un mittente appartenente esattamente a quel dominio. Cloudflare Email Service non viene usato perché, sul piano Workers Free, l'invio è limitato ai destinatari già verificati nell'account.
+L'invio usa [Resend](https://resend.com/docs/api-reference/introduction) con il dominio verificato `smartshift.dedyn.io`, gestito su deSEC. Il mittente applicativo è `SmartShift <noreply@smartshift.dedyn.io>`. Cloudflare Email Service non viene usato.
 
 Configurazione iniziale:
 
-1. Creare un account Resend. Per le prime prove si può usare `SmartShift <onboarding@resend.dev>` e inviare all'email proprietaria dell'account.
-2. Per l'uso reale, aggiungere un dominio in Resend, pubblicare i record DNS richiesti e attendere lo stato Verified. Creare quindi una API key dedicata a SmartShift.
+1. Verificare che `smartshift.dedyn.io` risulti **Verified** nel dashboard Resend. I record DNS sono gestiti su deSEC: non creare o migrare record email su Cloudflare.
+2. Creare una API key Resend dedicata a SmartShift.
 3. Salvare i valori nel Worker, senza inserirli in Git:
 
 ```sh
 npx wrangler secret put RESEND_API_KEY
-npx wrangler secret put EMAIL_FROM
-npx wrangler secret put EMAIL_FROM_NAME
 ```
 
-Per la prova, `EMAIL_FROM` può essere `SmartShift <onboarding@resend.dev>`. In produzione deve contenere un indirizzo del dominio verificato, per esempio `SmartShift <accesso@example.com>`; `EMAIL_FROM_NAME` è usato soltanto quando `EMAIL_FROM` non è impostato. Dopo il deploy creare un utente con una casella di test e verificare ricezione, scadenza, cambio obbligatorio e reinvio. L'app non salva mai la password temporanea in chiaro: se l'invio fallisce, la mostra una sola volta all'amministratore che ha creato o reinviato l'account, così può consegnarla con un canale sicuro. Il reinvio genera una nuova password e invalida quella precedente.
+`EMAIL_FROM=noreply@smartshift.dedyn.io` e `EMAIL_FROM_NAME=SmartShift` sono variabili non segrete dichiarate in `wrangler.jsonc`; il deploy le applica al Worker. Dopo il deploy creare un utente con una casella di test e verificare ricezione, scadenza, cambio obbligatorio e reinvio. L'app non salva mai la password temporanea in chiaro: se l'invio fallisce, la mostra una sola volta all'amministratore che ha creato o reinviato l'account, così può consegnarla con un canale sicuro. Il reinvio genera una nuova password e invalida quella precedente.
 
 In sviluppo locale gli stessi nomi possono essere inseriti in `.dev.vars`, che è escluso da Git. Senza questi valori l'account viene comunque creato in stato «invio non riuscito», così la configurazione può essere corretta e l'invito reinviato dal pannello.
 

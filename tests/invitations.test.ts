@@ -110,13 +110,23 @@ test('invitation delivery uses the Resend API without exposing the key in the pa
   }
   try {
     await sendInvitationEmail(
-      { apiKey: 'secret-test-key', appURL: 'https://smartshift.example' },
+      { apiKey: 'secret-test-key', from: 'noreply@smartshift.dedyn.io', fromName: 'SmartShift', appURL: 'https://smartshift.example' },
       { id: 'user', deliveryId: 'delivery', nome: 'Alice', cognome: 'Rossi', email: 'alice@example.com', password: 'Temporary-Password-123!', expiresAt: new Date(Date.now() + 60_000).toISOString() },
     )
     assert.equal(captured.url, 'https://api.resend.com/emails')
     assert.equal(captured.authorization, 'Bearer secret-test-key')
-    assert.match(captured.body || '', /onboarding@resend\.dev/)
+    assert.equal(JSON.parse(captured.body || '{}').from, 'SmartShift <noreply@smartshift.dedyn.io>')
     assert.match(captured.body || '', /Temporary-Password-123!/) // Resend needs the temporary credential to deliver it.
     assert.equal((captured.body || '').includes('secret-test-key'), false)
   } finally { globalThis.fetch = originalFetch }
+})
+
+test('invitation delivery refuses to send without an explicit configured sender', async () => {
+  await assert.rejects(
+    sendInvitationEmail(
+      { apiKey: 'secret-test-key', appURL: 'https://smartshift.example' },
+      { id: 'user', deliveryId: 'delivery', nome: 'Alice', cognome: 'Rossi', email: 'alice@example.com', password: 'Temporary-Password-123!', expiresAt: new Date(Date.now() + 60_000).toISOString() },
+    ),
+    /EMAIL_FROM/,
+  )
 })

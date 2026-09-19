@@ -83,9 +83,11 @@ export async function recordInvitationDelivery(db: D1Database, id: string, deliv
 
 export async function sendInvitationEmail(config: { apiKey?: string; from?: string; fromName?: string; appURL: string }, invite: {id:string;deliveryId:string;nome:string;cognome:string;email:string;password:string;expiresAt:string}) {
   if (!config.apiKey) throw new UserError('Account creato, ma invio email non configurato. Configura Resend e usa “Reinvia invito”.')
+  if (!config.from?.trim()) throw new UserError('Account creato, ma mittente email non configurato. Imposta EMAIL_FROM e usa “Reinvia invito”.')
   const fullName = `${invite.nome} ${invite.cognome}`
   const expiry = new Intl.DateTimeFormat('it-IT', { dateStyle: 'long', timeStyle: 'short', timeZone: 'Europe/Rome' }).format(new Date(invite.expiresAt))
-  const from = config.from || `${config.fromName || 'SmartShift'} <onboarding@resend.dev>`
+  const configuredFrom = config.from.trim()
+  const from = configuredFrom.includes('<') ? configuredFrom : `${config.fromName?.trim() || 'SmartShift'} <${configuredFrom}>`
   const response = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: {

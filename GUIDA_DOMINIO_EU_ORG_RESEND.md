@@ -1,5 +1,7 @@
 # Configurare un dominio EU.org con Cloudflare, SmartShift e Resend
 
+> **Nota storica:** questa guida descrive una precedente ipotesi di migrazione del sito e non va usata per modificare il DNS corrente. Il mittente attuale usa `smartshift.dedyn.io`, verificato in Resend e gestito esclusivamente su deSEC. Non aggiungere la zona o i record DKIM/SPF/DMARC a Cloudflare.
+
 Questa guida descrive l'intera configurazione, dalla scelta del dominio gratuito EU.org fino all'invio degli inviti SmartShift attraverso Resend. È pensata per l'architettura attuale del progetto:
 
 ```text
@@ -31,7 +33,7 @@ Sostituirlo ovunque con il dominio effettivamente richiesto e approvato. La stru
 | --- | --- |
 | Zona DNS gestita da Cloudflare | `smartshiftapp.eu.org` |
 | Indirizzo dell'applicazione | `app.smartshiftapp.eu.org` |
-| Mittente degli inviti | `SmartShift <accesso@smartshiftapp.eu.org>` |
+| Mittente degli inviti | `SmartShift <noreply@smartshift.dedyn.io>` |
 | Indirizzo attuale da sostituire | `https://smartshift-164.pages.dev` |
 
 L'applicazione usa il sottodominio `app`, mentre Resend verifica il dominio principale. In questo modo il sito e il mittente sono riconoscibili, ma possono essere configurati separatamente.
@@ -329,7 +331,7 @@ Se si dispone di una casella adatta a ricevere report aggregati, è possibile ag
 Quando il dominio è Verified, usare un mittente coerente:
 
 ```text
-SmartShift <accesso@smartshiftapp.eu.org>
+SmartShift <noreply@smartshift.dedyn.io>
 ```
 
 L'indirizzo serve come identità di invio. Per il flusso attuale non è obbligatorio che riceva risposte, ma è consigliabile scegliere un nome chiaro come `accesso`, `noreply` o `inviti`.
@@ -361,8 +363,8 @@ Impostare:
 | Nome | Valore | Tipo consigliato |
 | --- | --- | --- |
 | `RESEND_API_KEY` | nuova chiave Resend | Secret |
-| `EMAIL_FROM` | `SmartShift <accesso@smartshiftapp.eu.org>` | Secret o variabile |
-| `EMAIL_FROM_NAME` | `SmartShift` | Facoltativo; non serve se `EMAIL_FROM` include già il nome |
+| `EMAIL_FROM` | `noreply@smartshift.dedyn.io` | Variabile non segreta in `wrangler.jsonc` |
+| `EMAIL_FROM_NAME` | `SmartShift` | Variabile non segreta in `wrangler.jsonc` |
 
 Quando si modifica un secret del Worker, controllare che Cloudflare completi la nuova versione/deployment senza rimuovere `BETTER_AUTH_SECRET`.
 
@@ -372,8 +374,9 @@ Dal repository, con Wrangler autenticato:
 
 ```sh
 npx wrangler secret put RESEND_API_KEY
-npx wrangler secret put EMAIL_FROM
 ```
+
+Il mittente non è un segreto ed è già dichiarato in `wrangler.jsonc`; non deve essere inserito con `wrangler secret put`.
 
 Wrangler chiederà il valore in modo interattivo. Non mettere la chiave direttamente dopo il comando e non salvarla nella cronologia della shell.
 
@@ -512,7 +515,7 @@ Quando EU.org e Resend hanno terminato la verifica, per completare il lavoro nel
 Dominio approvato: smartshiftapp.eu.org
 Dominio Pages attivo: app.smartshiftapp.eu.org
 Dominio Resend: Verified
-Mittente scelto: accesso@smartshiftapp.eu.org
+Mittente scelto: noreply@smartshift.dedyn.io
 ```
 
 Non comunicare API key, token Cloudflare, password o cookie. La nuova chiave Resend deve essere inserita direttamente tra i secret del Worker.
