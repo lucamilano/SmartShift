@@ -30,7 +30,8 @@ export default function ExportPage() {
     <div className="max-w-3xl mx-auto space-y-7">
       
       <header>
-        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+        <p className="page-kicker">Reportistica</p>
+        <h1 className="page-title">
           Esportazione dati mensili
         </h1>
         <p className="mt-2 max-w-2xl text-sm text-muted-foreground sm:text-base">
@@ -38,7 +39,7 @@ export default function ExportPage() {
         </p>
       </header>
 
-      <section className="border-y py-5" aria-labelledby="period-title">
+      <section className="border-l-2 border-brand bg-card px-5 py-6 shadow-[0_18px_45px_-42px_rgba(13,70,66,.65)] sm:px-7" aria-labelledby="period-title">
           <h2 id="period-title" className="text-lg font-semibold">Periodo di esportazione</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Il file Excel includerà i giorni lavorativi dal lunedì al venerdì.
@@ -91,7 +92,7 @@ export default function ExportPage() {
         </div>
       </section>
       
-      <section aria-labelledby="legend-title">
+      <section className="bg-muted/55 px-5 py-4" aria-labelledby="legend-title">
         <h2 id="legend-title" className="text-sm font-medium">
           Legenda del file
         </h2>

@@ -4,6 +4,7 @@ import { LogoutButton } from '@/components/logout-button'
 import { Button } from '@/components/ui/button'
 import { Calendar, Users, FileSpreadsheet, KeyRound } from 'lucide-react'
 import { ThemeToggle } from '@/components/theme-toggle'
+import { NavLink } from '@/components/nav-link'
 
 export async function Navbar() {
   const user = await getCurrentUser()
@@ -13,24 +14,23 @@ export async function Navbar() {
   const isAdmin = profile?.ruolo === 'admin'
   
   return (
-    <nav className="border-b bg-background sticky top-0 z-50">
+    <nav className="sticky top-0 z-50 border-b bg-background/95">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 justify-between items-center">
           
           <div className="flex items-center gap-6">
-            <Link href="/dashboard/calendario">
-              <span className="text-lg font-semibold tracking-tight">SmartShift</span>
+            <Link href="/dashboard/calendario" className="flex items-center gap-2.5">
+              <span className="grid size-8 place-items-center bg-brand text-sm font-bold text-white" aria-hidden="true">S</span>
+              <span className="text-lg font-semibold tracking-[-0.03em]">SmartShift</span>
             </Link>
-            <Link href="/dashboard/calendario" className="hidden text-sm text-muted-foreground hover:text-foreground md:block">
-              Calendario
-            </Link>
+            <div className="hidden md:block"><NavLink href="/dashboard/calendario">Calendario</NavLink></div>
           </div>
 
           <div className="flex items-center gap-2">
             {isAdmin && (
               <div className="mr-1 hidden items-center gap-5 border-r pr-4 md:flex">
-                <Link href="/dashboard/esporta" className="text-sm text-muted-foreground hover:text-foreground">Esporta</Link>
-                <Link href="/dashboard/team" className="text-sm text-muted-foreground hover:text-foreground">Team</Link>
+                <NavLink href="/dashboard/esporta">Esporta</NavLink>
+                <NavLink href="/dashboard/team">Team</NavLink>
               </div>
             )}
             
@@ -50,20 +50,20 @@ export async function Navbar() {
         </div>
       </div>
 
-      {isAdmin && <div className="fixed bottom-0 left-0 right-0 z-50 border-t bg-background px-2 pb-safe md:hidden">
+      {isAdmin && <div className="fixed bottom-0 left-0 right-0 z-50 border-t bg-card px-2 pb-safe shadow-[0_-8px_28px_-24px_rgba(0,0,0,.6)] md:hidden">
         <div className="flex h-16 items-center justify-around">
-          <Link href="/dashboard/calendario" className="flex h-full w-full flex-col items-center justify-center text-muted-foreground hover:text-foreground">
+          <NavLink href="/dashboard/calendario" mobile>
             <Calendar className="h-5 w-5 mb-1" />
             <span className="text-xs font-medium">Calendario</span>
-          </Link>
-          <Link href="/dashboard/esporta" className="flex h-full w-full flex-col items-center justify-center text-muted-foreground hover:text-foreground">
+          </NavLink>
+          <NavLink href="/dashboard/esporta" mobile>
             <FileSpreadsheet className="h-5 w-5 mb-1" />
             <span className="text-xs font-medium">Esporta</span>
-          </Link>
-          <Link href="/dashboard/team" className="flex h-full w-full flex-col items-center justify-center text-muted-foreground hover:text-foreground">
+          </NavLink>
+          <NavLink href="/dashboard/team" mobile>
             <Users className="h-5 w-5 mb-1" />
             <span className="text-xs font-medium">Team</span>
-          </Link>
+          </NavLink>
         </div>
       </div>}
     </nav>

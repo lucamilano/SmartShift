@@ -12,10 +12,11 @@ export default function FirstAccessForm({ email, expired }: { email: string; exp
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState('')
   async function logout() { await authClient.signOut(); router.replace('/login'); router.refresh() }
-  return <main className="flex min-h-screen items-center justify-center px-5 py-10">
-    <section className="w-full max-w-sm" aria-labelledby="first-access-title">
+  return <main className="auth-shell">
+    <section className="auth-panel" aria-labelledby="first-access-title">
       <header className="mb-7">
-        <h1 id="first-access-title" className="text-xl font-semibold">Completa il primo accesso</h1>
+        <p className="page-kicker">Prima configurazione</p>
+        <h1 id="first-access-title" className="page-title">Completa il primo accesso</h1>
         <p className="mt-2 text-sm text-muted-foreground">{email}</p>
       </header>
         {expired ? <div className="space-y-4">

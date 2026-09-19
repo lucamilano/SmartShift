@@ -9,9 +9,10 @@ import { Label } from '@/components/ui/label'
 export default function AccountPage() {
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState('')
-  return <section className="mx-auto max-w-md" aria-labelledby="account-title">
-    <header className="mb-6 border-b pb-4">
-      <h1 id="account-title" className="text-2xl font-semibold">Cambia password</h1>
+  return <section className="mx-auto max-w-lg border-l-2 border-brand bg-card p-6 sm:p-8" aria-labelledby="account-title">
+    <header className="mb-7">
+      <p className="page-kicker">Sicurezza account</p>
+      <h1 id="account-title" className="page-title">Cambia password</h1>
     </header>
       <form className="space-y-4" onSubmit={async event => {
         event.preventDefault()

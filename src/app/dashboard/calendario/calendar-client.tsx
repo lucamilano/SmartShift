@@ -187,7 +187,7 @@ export default function CalendarClient({
   }
 
   return (
-    <section className="border bg-card overflow-hidden" aria-label="Calendario mensile">
+    <section className="overflow-hidden border border-border/80 bg-card shadow-[0_18px_45px_-38px_rgba(13,70,66,.55)]" aria-label="Calendario mensile">
       
       {targetUserName && (
         <div className="bg-amber-50 dark:bg-amber-950/30 px-4 py-3 border-b border-amber-200 dark:border-amber-900 text-sm text-amber-900 dark:text-amber-200">
@@ -196,8 +196,8 @@ export default function CalendarClient({
       )}
 
       {/* Intestazione Mese */}
-      <div className="flex items-center justify-between p-4 border-b sm:px-5">
-        <h2 className="text-xl font-semibold capitalize">
+      <div className="flex items-center justify-between border-b border-brand/15 bg-accent/35 p-4 sm:px-5">
+        <h2 className="text-xl font-semibold capitalize tracking-[-0.02em]">
           {format(currentMonth, 'MMMM yyyy', { locale: it })}
         </h2>
         <div className="flex gap-2">

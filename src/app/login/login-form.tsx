@@ -12,10 +12,11 @@ export default function LoginForm() {
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
   return (
-    <main className="flex min-h-screen items-center justify-center px-5 py-10">
-      <section className="w-full max-w-sm" aria-labelledby="login-title">
+    <main className="auth-shell">
+      <section className="auth-panel" aria-labelledby="login-title">
         <header className="mb-7">
-          <h1 id="login-title" className="text-2xl font-semibold">Accedi a SmartShift</h1>
+          <p className="page-kicker">Pianificazione del lavoro</p>
+          <h1 id="login-title" className="page-title">Bentornato in SmartShift</h1>
         </header>
           <form className="space-y-5" onSubmit={async event => {
             event.preventDefault()

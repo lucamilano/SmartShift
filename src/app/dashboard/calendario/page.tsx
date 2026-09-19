@@ -27,10 +27,11 @@ export default async function CalendarioPage({ searchParams }: { searchParams: P
   return (
     <div className="max-w-5xl mx-auto space-y-6">
       <header>
-        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+        <p className="page-kicker">Pianificazione mensile</p>
+        <h1 className="page-title">
           {targetUserName ? `Calendario di ${targetUserName}` : 'Il mio calendario'}
         </h1>
-        <p className="mt-2 max-w-3xl text-sm text-muted-foreground sm:text-base">
+        <p className="mt-3 max-w-3xl text-sm leading-relaxed text-muted-foreground sm:text-base">
           {targetUserName 
             ? 'Stai modificando la pianificazione di questo collega.'
             : 'Seleziona un giorno per aggiungere una presenza; usa il cestino per rimuoverla.'}

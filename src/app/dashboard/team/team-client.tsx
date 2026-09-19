@@ -162,7 +162,8 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
       {/* Intestazione */}
       <header className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+          <p className="page-kicker">Amministrazione</p>
+          <h1 className="page-title">
             Gestione team
           </h1>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground sm:text-base">
@@ -175,20 +176,20 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
       </header>
 
       {/* Panoramica di Oggi */}
-      <section aria-labelledby="today-title">
-        <h2 id="today-title" className="text-sm font-medium text-muted-foreground">Situazione di oggi</h2>
-        <dl className="mt-3 grid grid-cols-2 border-y sm:grid-cols-3 md:grid-cols-5 md:divide-x">
-          <div className="py-3 md:px-4 md:first:pl-0"><dt className="text-sm text-muted-foreground">In ufficio</dt><dd className="mt-1 text-2xl font-semibold tabular-nums">{stats.ufficio}</dd></div>
-          <div className="py-3 md:px-4"><dt className="text-sm text-muted-foreground">Smartworking</dt><dd className="mt-1 text-2xl font-semibold tabular-nums">{stats.smartworking}</dd></div>
-          <div className="py-3 md:px-4"><dt className="text-sm text-muted-foreground">Ferie</dt><dd className="mt-1 text-2xl font-semibold tabular-nums">{stats.ferie}</dd></div>
-          <div className="py-3 md:px-4"><dt className="text-sm text-muted-foreground">Malattia</dt><dd className="mt-1 text-2xl font-semibold tabular-nums">{stats.malattia}</dd></div>
-          <div className="py-3 md:px-4"><dt className="text-sm text-muted-foreground">Non pianificati</dt><dd className="mt-1 text-2xl font-semibold tabular-nums">{stats.assenti_non_giustificati}</dd></div>
+      <section className="border-l-2 border-brand bg-accent/25 px-5 py-4" aria-labelledby="today-title">
+        <h2 id="today-title" className="text-sm font-semibold text-brand-strong dark:text-brand">Situazione di oggi</h2>
+        <dl className="mt-3 grid grid-cols-2 gap-y-4 sm:grid-cols-3 md:grid-cols-5 md:divide-x md:divide-brand/15">
+          <div className="md:px-4 md:first:pl-0"><dt className="text-sm text-muted-foreground">In ufficio</dt><dd className="mt-1 text-2xl font-semibold tabular-nums text-brand-strong dark:text-brand">{stats.ufficio}</dd></div>
+          <div className="md:px-4"><dt className="text-sm text-muted-foreground">Smartworking</dt><dd className="mt-1 text-2xl font-semibold tabular-nums text-brand-strong dark:text-brand">{stats.smartworking}</dd></div>
+          <div className="md:px-4"><dt className="text-sm text-muted-foreground">Ferie</dt><dd className="mt-1 text-2xl font-semibold tabular-nums">{stats.ferie}</dd></div>
+          <div className="md:px-4"><dt className="text-sm text-muted-foreground">Malattia</dt><dd className="mt-1 text-2xl font-semibold tabular-nums">{stats.malattia}</dd></div>
+          <div className="md:px-4"><dt className="text-sm text-muted-foreground">Non pianificati</dt><dd className="mt-1 text-2xl font-semibold tabular-nums text-warm-foreground">{stats.assenti_non_giustificati}</dd></div>
         </dl>
       </section>
 
       {/* Tabella Colleghi */}
-      <section className="border-y" aria-labelledby="members-title">
-        <div className="flex items-baseline gap-2 border-b py-4">
+      <section className="border bg-card" aria-labelledby="members-title">
+        <div className="flex items-baseline gap-2 border-b bg-muted/35 px-5 py-4">
           <h2 id="members-title" className="text-lg font-semibold">Colleghi</h2>
           <span className="text-sm text-muted-foreground">{members.length}</span>
         </div>
