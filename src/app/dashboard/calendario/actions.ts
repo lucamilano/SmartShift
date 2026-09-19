@@ -12,6 +12,10 @@ export async function getOthersHolidays(startDate: string, endDate: string, targ
   return (await getRepository()).othersHolidays(startDate, endDate, targetUserId)
 }
 
+export async function getTeamSchedule(startDate: string, endDate: string) {
+  return (await getRepository()).teamSchedule(startDate, endDate)
+}
+
 export async function addEvent(date: string, type: string, isHalfDay = false, targetUserId?: string) {
   const repository = await getRepository()
   try {

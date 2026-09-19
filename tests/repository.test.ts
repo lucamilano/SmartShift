@@ -76,6 +76,9 @@ test('users cannot read/write another calendar or administer profiles/export', a
     await assert.rejects(alice.othersHolidays('2026-09-01', '2026-09-30', 'bob'), /Non autorizzato/)
     await assert.rejects(anonymous.othersHolidays('2026-09-01', '2026-09-30'), /non autorizzato/)
     assert.equal((await bob.events('2026-09-01', '2026-09-30')).length, 1)
+    const visibleSchedule = await alice.teamSchedule('2026-09-01', '2026-09-30')
+    assert.equal(visibleSchedule[0].utente_id, 'bob')
+    assert.equal(visibleSchedule[0].tipo, 'ufficio')
   } finally { sqlite.close() }
 })
 

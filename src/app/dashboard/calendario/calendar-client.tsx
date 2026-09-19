@@ -4,12 +4,10 @@ import { useState, useEffect } from 'react'
 import { startOfMonth, endOfMonth, eachDayOfInterval, format, isToday, addMonths, subMonths, getDay, isWeekend } from 'date-fns'
 import { it } from 'date-fns/locale'
 import { getItalianHoliday } from '@/utils/holidays'
-import { ChevronLeft, ChevronRight, Trash2, Users } from 'lucide-react'
+import { BriefcaseBusiness, ChevronLeft, ChevronRight, Clock3, HeartPulse, Home, Plane, ShieldCheck, Trash2, Users } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { addEvent, deleteEvent, getUserEvents, getOthersHolidays } from './actions'
+import { addEvent, deleteEvent, getUserEvents, getTeamSchedule } from './actions'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Label } from '@/components/ui/label'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,10 +26,15 @@ type Event = {
   mezza_giornata: boolean
 }
 
-type OtherHoliday = {
+type TeamScheduleEntry = {
   data: string
-  nome: string
   tipo: string
+  mezza_giornata: boolean
+  utente_id: string
+  email: string
+  nome: string
+  cognome: string
+  ruolo: 'user' | 'admin'
 }
 
 const TYPE_COLORS: Record<string, string> = {
@@ -50,21 +53,30 @@ const TYPE_LABELS: Record<string, string> = {
   'ufficio': 'In Ufficio',
 }
 
+const EVENT_OPTIONS = [
+  { value: 'smartworking', label: 'Smartworking', note: 'Lavoro da remoto', icon: Home, color: 'text-blue-700 dark:text-blue-300', selected: 'border-blue-500 bg-blue-50 dark:bg-blue-950/40' },
+  { value: 'ufficio', label: 'In ufficio', note: 'Presenza in sede', icon: BriefcaseBusiness, color: 'text-emerald-700 dark:text-emerald-300', selected: 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40' },
+  { value: 'permesso', label: 'Permesso', note: 'Assenza autorizzata', icon: Clock3, color: 'text-violet-700 dark:text-violet-300', selected: 'border-violet-500 bg-violet-50 dark:bg-violet-950/40' },
+  { value: 'ferie', label: 'Ferie', note: 'Giornata di ferie', icon: Plane, color: 'text-amber-700 dark:text-amber-300', selected: 'border-amber-500 bg-amber-50 dark:bg-amber-950/40' },
+  { value: 'malattia', label: 'Malattia', note: 'Assenza per malattia', icon: HeartPulse, color: 'text-red-700 dark:text-red-300', selected: 'border-red-500 bg-red-50 dark:bg-red-950/40' },
+] as const
+
 export default function CalendarClient({ 
   initialEvents, 
-  initialOthersHolidays,
+  initialTeamSchedule,
   targetUserId, 
   targetUserName 
 }: { 
   initialEvents: Event[], 
-  initialOthersHolidays: OtherHoliday[],
+  initialTeamSchedule: TeamScheduleEntry[],
   targetUserId?: string, 
   targetUserName?: string 
 }) {
   const [currentMonth, setCurrentMonth] = useState(new Date())
   const [events, setEvents] = useState<Event[]>(initialEvents)
-  const [othersHolidays, setOthersHolidays] = useState<OtherHoliday[]>(initialOthersHolidays)
+  const [teamSchedule, setTeamSchedule] = useState<TeamScheduleEntry[]>(initialTeamSchedule)
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
+  const [teamDetailDate, setTeamDetailDate] = useState<Date | null>(null)
   
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [eventType, setEventType] = useState('smartworking')
@@ -100,13 +112,13 @@ export default function CalendarClient({
       const start = format(startOfMonth(currentMonth), 'yyyy-MM-dd')
       const end = format(endOfMonth(currentMonth), 'yyyy-MM-dd')
       
-      const [myData, othersData] = await Promise.all([
+      const [myData, teamData] = await Promise.all([
         getUserEvents(start, end, targetUserId),
-        getOthersHolidays(start, end, targetUserId)
+        getTeamSchedule(start, end)
       ])
       
       setEvents(myData)
-      setOthersHolidays(othersData)
+      setTeamSchedule(teamData)
     }
     fetchEvents()
   }, [currentMonth, targetUserId])
@@ -172,8 +184,12 @@ export default function CalendarClient({
       // Ricarichiamo in tempo reale
       const start = format(startOfMonth(currentMonth), 'yyyy-MM-dd')
       const end = format(endOfMonth(currentMonth), 'yyyy-MM-dd')
-      const newEvents = await getUserEvents(start, end, targetUserId)
+      const [newEvents, newTeamSchedule] = await Promise.all([
+        getUserEvents(start, end, targetUserId),
+        getTeamSchedule(start, end),
+      ])
       setEvents(newEvents)
+      setTeamSchedule(newTeamSchedule)
     }
   }
 
@@ -183,6 +199,7 @@ export default function CalendarClient({
     const res = await deleteEvent(id, targetUserId)
     if (!res.error) {
       setEvents(events.filter(ev => ev.id !== id))
+      setTeamSchedule(teamSchedule.filter(entry => !(entry.utente_id === targetUserId && entry.data === events.find(event => event.id === id)?.data)))
     } else {
       showAlert('Rimozione non riuscita', res.error)
     }
@@ -241,7 +258,7 @@ export default function CalendarClient({
             const today = isToday(day)
             const holidayName = getItalianHoliday(day)
             const weekend = isWeekend(day)
-            const absentColleagues = othersHolidays.filter(h => h.data === dayStr)
+            const scheduledPeople = teamSchedule.filter(entry => entry.data === dayStr)
             
             return (
               <div 
@@ -307,16 +324,18 @@ export default function CalendarClient({
                   </div>
                 ) : null}
 
-                {/* Indicatore Colleghi Fuori Sede (Ferie, Smart, Malattia) */}
-                {!weekend && !holidayName && absentColleagues.length > 0 && (
-                  <div 
-                    className="absolute inset-x-1 bottom-1 flex items-center p-1 bg-background border rounded-sm text-xs leading-tight text-muted-foreground z-20 cursor-help"
-                    title={`Fuori ufficio:\n${absentColleagues.map(c => `- ${c.nome} (${c.tipo})`).join('\n')}`}
-                    aria-label={`${absentColleagues.length} colleghi fuori ufficio`}
+                {/* Quadro giornaliero del team */}
+                {scheduledPeople.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={(event) => { event.stopPropagation(); setTeamDetailDate(day) }}
+                    className="absolute right-1 top-1 z-20 inline-flex items-center gap-0.5 border border-brand/20 bg-card/95 px-1 py-1 text-[11px] font-semibold text-brand-strong shadow-[0_1px_3px_rgba(0,0,0,.08)] transition-colors hover:border-brand hover:bg-accent sm:gap-1 sm:px-1.5 dark:text-brand"
+                    aria-label={`Mostra le ${scheduledPeople.length} persone pianificate il ${format(day, 'd MMMM yyyy', { locale: it })}`}
                   >
-                    <Users className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-0.5 shrink-0" />
-                    <span className="truncate">{absentColleagues.length}</span>
-                  </div>
+                    <Users className="hidden size-3 shrink-0 sm:block" aria-hidden="true" />
+                    <span>{scheduledPeople.length}</span>
+                    <span className="hidden xl:inline">persone</span>
+                  </button>
                 )}
 
               </div>
@@ -325,48 +344,73 @@ export default function CalendarClient({
         </div>
       </div>
 
+      <Dialog open={Boolean(teamDetailDate)} onOpenChange={(open) => { if (!open) setTeamDetailDate(null) }}>
+        <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-lg">
+          <DialogHeader>
+            <p className="page-kicker">Quadro del team</p>
+            <DialogTitle className="text-2xl capitalize">{teamDetailDate ? format(teamDetailDate, 'EEEE d MMMM', { locale: it }) : ''}</DialogTitle>
+            <DialogDescription>Chi ha pianificato la giornata e con quale modalità.</DialogDescription>
+          </DialogHeader>
+          <div className="divide-y border-y">
+            {teamSchedule.filter(entry => entry.data === (teamDetailDate ? format(teamDetailDate, 'yyyy-MM-dd') : '')).map(entry => {
+              const label = [entry.nome, entry.cognome].filter(Boolean).join(' ') || entry.email
+              return <div key={entry.utente_id} className="flex items-center justify-between gap-4 py-3">
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold">{label}</p>
+                  <p className="text-xs text-muted-foreground">{entry.ruolo === 'admin' ? 'Admin' : 'Utente'}</p>
+                </div>
+                <div className={`shrink-0 border px-2.5 py-1 text-xs font-semibold ${TYPE_COLORS[entry.tipo] || 'bg-muted'}`}>
+                  {TYPE_LABELS[entry.tipo] || entry.tipo}{entry.mezza_giornata ? ' · ½ giornata' : ''}
+                </div>
+              </div>
+            })}
+          </div>
+          <DialogFooter><Button variant="outline" onClick={() => setTeamDetailDate(null)}>Chiudi</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Modale Inserimento */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="max-h-[92vh] overflow-y-auto p-0 sm:max-w-2xl">
           <DialogHeader>
-            <DialogTitle className="text-xl">Inserisci presenza</DialogTitle>
-            <DialogDescription>
-              Stai pianificando per il <strong>{selectedDate ? format(selectedDate, 'd MMMM yyyy', { locale: it }) : ''}</strong>.
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="space-y-6 py-4">
-            <div className="space-y-3">
-              <Label>Tipo di attività</Label>
-              <Select value={eventType} onValueChange={setEventType}>
-                <SelectTrigger className="h-12 text-base">
-                  <SelectValue placeholder="Seleziona..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="smartworking">Smartworking</SelectItem>
-                  <SelectItem value="ufficio">In ufficio</SelectItem>
-                  <SelectItem value="ferie">Ferie</SelectItem>
-                  <SelectItem value="permesso">Permesso</SelectItem>
-                  <SelectItem value="malattia">Malattia</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="border-b border-brand/15 bg-accent/30 px-5 py-5 sm:px-6">
+              <p className="page-kicker">Nuova pianificazione</p>
+              <DialogTitle className="text-2xl capitalize">{selectedDate ? format(selectedDate, 'EEEE d MMMM', { locale: it }) : ''}</DialogTitle>
+              <DialogDescription className="mt-2">{targetUserName ? `Turno per ${targetUserName}` : 'Scegli attività e durata della giornata.'}</DialogDescription>
             </div>
+          </DialogHeader>
 
-            <div className="space-y-3">
-              <Label>Durata</Label>
-              <Select value={isHalfDay} onValueChange={(val: 'true' | 'false') => setIsHalfDay(val)}>
-                <SelectTrigger className="h-12 text-base">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="false">Giornata intera</SelectItem>
-                  <SelectItem value="true">Mezza giornata</SelectItem>
-                </SelectContent>
-              </Select>
+          <div className="space-y-7 px-5 py-5 sm:px-6">
+            <fieldset>
+              <legend className="text-sm font-semibold">Come sarà organizzata la giornata?</legend>
+              <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2" role="radiogroup">
+                {EVENT_OPTIONS.map(option => {
+                  const Icon = option.icon
+                  const selected = eventType === option.value
+                  return <button key={option.value} type="button" role="radio" aria-checked={selected} onClick={() => setEventType(option.value)} className={`flex min-h-16 items-center gap-3 border p-3 text-left transition-[border-color,background-color] ${selected ? option.selected : 'bg-card hover:border-brand/40 hover:bg-accent/20'} ${option.value === 'malattia' ? 'sm:col-span-2' : ''}`}>
+                    <Icon className={`size-5 shrink-0 ${option.color}`} aria-hidden="true" />
+                    <span className="min-w-0"><span className="block text-sm font-semibold">{option.label}</span><span className="block text-xs text-muted-foreground">{option.note}</span></span>
+                    {selected && <ShieldCheck className="ml-auto size-4 shrink-0 text-brand" aria-hidden="true" />}
+                  </button>
+                })}
+              </div>
+            </fieldset>
+
+            <fieldset>
+              <legend className="text-sm font-semibold">Durata</legend>
+              <div className="mt-3 grid grid-cols-2 border bg-muted/35 p-1">
+                <button type="button" aria-pressed={isHalfDay === 'false'} onClick={() => setIsHalfDay('false')} className={`min-h-10 px-3 text-sm font-semibold transition-colors ${isHalfDay === 'false' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}>Giornata intera</button>
+                <button type="button" aria-pressed={isHalfDay === 'true'} onClick={() => setIsHalfDay('true')} className={`min-h-10 px-3 text-sm font-semibold transition-colors ${isHalfDay === 'true' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}>Mezza giornata</button>
+              </div>
+            </fieldset>
+
+            <div className="flex items-center justify-between gap-4 border-l-2 border-brand bg-accent/25 px-4 py-3 text-sm">
+              <span className="text-muted-foreground">Riepilogo</span>
+              <strong className="text-right">{TYPE_LABELS[eventType]} · {isHalfDay === 'true' ? 'Mezza giornata' : 'Giornata intera'}</strong>
             </div>
           </div>
-          
-          <DialogFooter className="gap-2 sm:gap-0">
+
+          <DialogFooter className="border-t bg-muted/20 px-5 py-4 sm:px-6">
             <Button variant="ghost" onClick={() => setIsModalOpen(false)}>Annulla</Button>
             <Button onClick={handleCreate} disabled={loading}>
               {loading ? 'Salvataggio...' : 'Conferma'}

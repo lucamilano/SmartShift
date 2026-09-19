@@ -2,7 +2,7 @@ import { requireUser, getRepository } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import CalendarClient from './calendar-client'
 import { startOfMonth, endOfMonth, format } from 'date-fns'
-import { getOthersHolidays } from './actions'
+import { getTeamSchedule } from './actions'
 import { CalendarUserPicker } from './calendar-user-picker'
 
 export const dynamic = 'force-dynamic'
@@ -26,7 +26,7 @@ export default async function CalendarioPage({ searchParams }: { searchParams: P
 
   const initialEvents = await repository.events(startDate, endDate, effectiveUserId)
 
-  const initialOthersHolidays = await getOthersHolidays(startDate, endDate, effectiveUserId)
+  const initialTeamSchedule = await getTeamSchedule(startDate, endDate)
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
@@ -47,7 +47,7 @@ export default async function CalendarioPage({ searchParams }: { searchParams: P
         )}
       </header>
 
-      <CalendarClient initialEvents={initialEvents || []} initialOthersHolidays={initialOthersHolidays || []} targetUserId={effectiveUserId} targetUserName={targetUserName} />
+      <CalendarClient initialEvents={initialEvents || []} initialTeamSchedule={initialTeamSchedule || []} targetUserId={effectiveUserId} targetUserName={targetUserName} />
     </div>
   )
 }

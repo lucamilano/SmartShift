@@ -74,6 +74,21 @@ export class Repository {
     return results.map(row => ({ ...row, mezza_giornata: Boolean(row.mezza_giornata) }))
   }
 
+  async teamSchedule(start: string, end: string) {
+    await this.currentProfile()
+    validateRange(start, end)
+    const { results } = await this.db.prepare(`SELECT e.data, e.tipo, e.mezza_giornata,
+      p.id AS utente_id, p.email, p.nome, p.cognome, p.ruolo
+      FROM eventi_calendario e JOIN profili p ON p.id = e.utente_id
+      WHERE p.is_active = 1 AND e.stato = 'approvato' AND e.data BETWEEN ? AND ?
+      ORDER BY e.data, p.cognome, p.nome, p.email`)
+      .bind(start, end).all<{
+        data: string; tipo: CalendarEvent['tipo']; mezza_giornata: number; utente_id: string
+        email: string; nome: string; cognome: string; ruolo: Profile['ruolo']
+      }>()
+    return results.map(row => ({ ...row, mezza_giornata: Boolean(row.mezza_giornata) }))
+  }
+
   async othersHolidays(start: string, end: string, targetId?: string) {
     const target = await this.target(targetId)
     validateRange(start, end)
