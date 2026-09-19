@@ -382,7 +382,7 @@ export default function CalendarClient({
       </div>
 
       {isMultiSelecting && (
-        <div className="fixed inset-x-3 bottom-3 z-40 mx-auto flex max-w-xl items-center gap-3 border border-brand/25 bg-card/95 p-3 shadow-[0_18px_55px_-18px_rgba(13,70,66,.5)] backdrop-blur sm:bottom-5 sm:p-4">
+        <div className="fixed inset-x-3 bottom-[calc(4rem+env(safe-area-inset-bottom)+0.75rem)] z-40 mx-auto flex max-w-xl items-center gap-3 border border-brand/25 bg-card/95 p-3 shadow-[0_18px_55px_-18px_rgba(13,70,66,.5)] backdrop-blur sm:p-4 md:bottom-5">
           <div className="min-w-0 flex-1">
             <p className="text-sm font-semibold">{selectedDates.length === 0 ? 'Seleziona i giorni' : `${selectedDates.length} ${selectedDates.length === 1 ? 'giorno selezionato' : 'giorni selezionati'}`}</p>
             <p className="truncate text-xs text-muted-foreground">Tocca i giorni liberi per aggiungerli o rimuoverli.</p>
@@ -421,16 +421,16 @@ export default function CalendarClient({
 
       {/* Modale Inserimento */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="max-h-[92vh] overflow-y-auto p-0 sm:max-w-2xl">
+        <DialogContent className="grid h-[calc(100dvh-1rem)] max-h-[calc(100dvh-1rem)] w-[calc(100%-1rem)] max-w-none grid-rows-[auto_minmax(0,1fr)_auto] gap-0 overflow-hidden p-0 sm:h-auto sm:max-h-[calc(100dvh-2rem)] sm:max-w-2xl">
           <DialogHeader>
-            <div className="border-b border-brand/15 bg-accent/30 px-5 py-5 sm:px-6">
+            <div className="border-b border-brand/15 bg-accent/30 px-5 py-4 pr-12 sm:px-6 sm:py-5 sm:pr-12">
               <p className="page-kicker">Nuova pianificazione</p>
               <DialogTitle className="text-2xl capitalize">{selectedDates.length > 0 ? `${selectedDates.length} ${selectedDates.length === 1 ? 'giorno selezionato' : 'giorni selezionati'}` : selectedDate ? format(selectedDate, 'EEEE d MMMM', { locale: it }) : ''}</DialogTitle>
               <DialogDescription className="mt-2">{targetUserName ? `Applica la pianificazione a ${targetUserName}.` : selectedDates.length > 1 ? 'La stessa pianificazione sarà applicata a tutti i giorni.' : 'Scegli attività e durata della giornata.'}</DialogDescription>
             </div>
           </DialogHeader>
 
-          <div className="space-y-7 px-5 py-5 sm:px-6">
+          <div className="min-h-0 space-y-7 overflow-y-auto overscroll-contain px-5 py-5 sm:px-6">
             {selectedDates.length > 0 && (
               <div className="border-l-2 border-brand bg-accent/25 px-3 py-3">
                 <p className="mb-2 text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">Date incluse</p>
@@ -490,7 +490,7 @@ export default function CalendarClient({
             </div>
           </div>
 
-          <DialogFooter className="border-t bg-muted/20 px-5 py-4 sm:px-6">
+          <DialogFooter className="border-t bg-muted/20 px-5 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-4 sm:px-6 sm:pb-4">
             <Button variant="ghost" onClick={() => setIsModalOpen(false)}>Annulla</Button>
             <Button onClick={handleCreate} disabled={loading}>
               {loading ? 'Salvataggio...' : 'Conferma'}
