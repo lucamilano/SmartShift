@@ -2,6 +2,20 @@
 
 Le voci descrivono le modifiche al repository. La pipeline GitHub pubblica gli aggiornamenti di `main` dopo i controlli, previa configurazione del token Cloudflare.
 
+## Unreleased
+
+### Changed
+
+- Aggiornati README, ignore e documentazione operativa per rendere la configurazione locale e di produzione più chiara.
+
+### Security
+
+- Aggiunti header HTTP difensivi per contenuti pubblici e asset serviti da Cloudflare Pages.
+
+### Removed
+
+- Rimossi asset SVG template Next.js non referenziati.
+
 ## 2026-09-17 — Deploy automatico
 
 - Aggiunta GitHub Action per test, lint, build e TypeScript sulle pull request e su `main`.
