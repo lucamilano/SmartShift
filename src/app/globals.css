@@ -94,14 +94,14 @@
     background-size: 4.5rem 100%;
     text-rendering: optimizeLegibility;
   }
-  h1, h2 { text-wrap: balance; }
+  h1, h2 { text-wrap: balance; overflow-wrap: anywhere; }
   ::selection { background: color-mix(in oklab, var(--brand) 25%, transparent); }
 }
 
 @layer components {
   .page-kicker { @apply mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-brand; }
   .page-title { @apply text-3xl font-semibold tracking-[-0.035em] sm:text-4xl; }
-  .auth-shell { @apply relative flex min-h-screen items-center justify-center overflow-hidden px-5 py-10; }
+  .auth-shell { @apply relative flex min-h-dvh items-center justify-center overflow-hidden px-4 py-8 sm:px-5 sm:py-10; }
   .auth-shell::before { content: ""; @apply absolute inset-y-0 left-0 w-2 bg-brand; }
-  .auth-panel { @apply relative w-full max-w-md border-l-2 border-brand bg-card p-7 shadow-[0_18px_60px_-38px_rgba(13,70,66,.65)] sm:p-9; }
+  .auth-panel { @apply relative w-full min-w-0 max-w-md border-l-2 border-brand bg-card p-5 shadow-[0_18px_60px_-38px_rgba(13,70,66,.65)] sm:p-9; }
 }

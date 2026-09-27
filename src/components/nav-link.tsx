@@ -9,7 +9,7 @@ export function NavLink({ href, children, mobile = false, exact = false }: { hre
   const active = pathname === href || (!exact && pathname.startsWith(`${href}/`))
   return <Link href={href} aria-current={active ? 'page' : undefined} className={cn(
     mobile
-      ? 'relative flex h-full w-full flex-col items-center justify-center gap-1 text-muted-foreground transition-colors hover:text-foreground'
+      ? 'relative flex h-full min-w-0 flex-1 flex-col items-center justify-center gap-1 text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring'
       : 'relative py-5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground',
     active && (mobile ? 'text-brand after:absolute after:bottom-0 after:h-1 after:w-8 after:bg-brand' : 'text-foreground after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:bg-warm')
   )}>{children}</Link>

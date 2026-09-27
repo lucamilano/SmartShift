@@ -172,7 +172,7 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
             Presenze di oggi e anagrafica dei colleghi.
           </p>
         </div>
-        <Button onClick={() => setIsNewUserModalOpen(true)}>
+        <Button className="w-full sm:w-auto" onClick={() => setIsNewUserModalOpen(true)}>
           Nuovo collega
         </Button>
       </header>
@@ -204,22 +204,23 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
 
               return (
                 <div key={member.id} className="p-4 flex flex-col gap-3">
-                  <div className="flex justify-between items-start">
-                    <div className="flex items-center gap-3">
+                  <div className="flex min-w-0 justify-between items-start">
+                    <div className="flex min-w-0 items-center gap-3">
                       <Avatar className="h-10 w-10">
                         <AvatarFallback className="font-semibold">
                           {(member.nome?.[0] || 'U') + (member.cognome?.[0] || '')}
                         </AvatarFallback>
                       </Avatar>
-                      <div>
-                        <div className="font-semibold">{[member.nome, member.cognome].filter(Boolean).join(' ') || member.email}</div>
+                      <div className="min-w-0">
+                        <div className="break-words font-semibold">{[member.nome, member.cognome].filter(Boolean).join(' ') || member.email}</div>
+                        <div className="break-all text-sm text-muted-foreground">{member.email}</div>
                         <div className="mt-0.5 text-xs text-muted-foreground">
                           {member.ruolo === 'admin' 
                             ? <span className="font-medium text-foreground">Amministratore</span>
                             : <span>Utente</span>
                           }
                         </div>
-                        {member.must_change_password && <p className="mt-1 text-xs font-medium text-amber-700 dark:text-amber-400">Primo accesso in attesa</p>}
+                        {member.must_change_password && <p className="mt-1 text-xs font-medium text-amber-700 dark:text-amber-400">Invito {member.invitation_status === 'failed' ? 'non inviato' : 'in attesa'}</p>}
                       </div>
                     </div>
                   </div>
@@ -229,8 +230,8 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
                     <TodayStatus event={todayStatus} />
                   </div>
                   
-                  <div className="mt-1 flex justify-end gap-2 border-t pt-3">
-                    <Button variant="outline" size="sm" asChild className="flex-1">
+                  <div className="mt-1 flex flex-wrap justify-end gap-1 border-t pt-3 sm:gap-2">
+                    <Button variant="outline" size="sm" asChild className="w-full sm:w-auto sm:flex-1">
                       <Link href={`/dashboard/calendario?userId=${member.id}`}>
                         <CalendarDays className="h-3.5 w-3.5 mr-1" /> Calendario
                       </Link>
@@ -244,7 +245,7 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
                     >
                       <FileEdit className="h-4 w-4" />
                     </Button>
-                    {member.must_change_password && <Button variant="ghost" size="icon" disabled={loading} onClick={() => handleResendInvitation(member)} title="Reinvia invito" aria-label="Reinvia invito" className="h-8 w-8 text-amber-700 shrink-0"><Mail className="h-4 w-4" /></Button>}
+                    {member.must_change_password && <Button variant="ghost" size="icon" disabled={loading} onClick={() => handleResendInvitation(member)} title="Reinvia invito" aria-label="Reinvia invito" className="text-amber-700 shrink-0"><Mail className="h-4 w-4" /></Button>}
                     <Button 
                       variant="ghost" 
                       size="icon" 
@@ -355,9 +356,9 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
             </div>
 
             <div className="space-y-2">
-              <Label className="text-sm font-semibold">Qualifica / Ruolo nel Sistema</Label>
+              <Label htmlFor="editRuolo" className="text-sm font-semibold">Qualifica / Ruolo nel Sistema</Label>
               <Select value={editRuolo} onValueChange={(val: string) => setEditRuolo(val)}>
-                <SelectTrigger>
+                <SelectTrigger id="editRuolo" className="w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>

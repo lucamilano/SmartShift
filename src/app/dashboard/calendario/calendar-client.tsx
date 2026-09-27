@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { startOfMonth, endOfMonth, eachDayOfInterval, format, isToday, addMonths, subMonths, getDay, isWeekend } from 'date-fns'
 import { it } from 'date-fns/locale'
 import { getItalianHoliday } from '@/utils/holidays'
@@ -79,6 +79,8 @@ export default function CalendarClient({
   const [selectedDates, setSelectedDates] = useState<string[]>([])
   const [isMultiSelecting, setIsMultiSelecting] = useState(false)
   const [teamDetailDate, setTeamDetailDate] = useState<Date | null>(null)
+  const [mobileDetailDate, setMobileDetailDate] = useState<Date | null>(null)
+  const mobileDetailRef = useRef<HTMLDivElement>(null)
   
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [eventType, setEventType] = useState('smartworking')
@@ -105,8 +107,8 @@ export default function CalendarClient({
   }
 
   // Mesi precedenti e successivi
-  const nextMonth = () => setCurrentMonth(addMonths(currentMonth, 1))
-  const prevMonth = () => setCurrentMonth(subMonths(currentMonth, 1))
+  const nextMonth = () => { setMobileDetailDate(null); setCurrentMonth(addMonths(currentMonth, 1)) }
+  const prevMonth = () => { setMobileDetailDate(null); setCurrentMonth(subMonths(currentMonth, 1)) }
 
   // Ricarica i dati (senza ricaricare la pagina) quando si cambia mese
   useEffect(() => {
@@ -125,6 +127,10 @@ export default function CalendarClient({
     fetchEvents()
   }, [currentMonth, targetUserId])
 
+  useEffect(() => {
+    if (mobileDetailDate) mobileDetailRef.current?.scrollIntoView({ block: 'nearest' })
+  }, [mobileDetailDate])
+
   // Calcola quante celle vuote mettere all'inizio (il giorno 0 per Date-fns è Domenica)
   const firstDayOfMonth = getDay(startOfMonth(currentMonth))
   const paddingDays = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1
@@ -135,7 +141,7 @@ export default function CalendarClient({
   })
 
   // Apre la modale per l'inserimento
-  const handleDayClick = (day: Date) => {
+  const handleDayClick = (day: Date, openEditor = false) => {
     const dayStr = format(day, 'yyyy-MM-dd')
     const existingEvent = events.find(e => e.data === dayStr)
 
@@ -145,6 +151,11 @@ export default function CalendarClient({
         return
       }
       setSelectedDates(current => current.includes(dayStr) ? current.filter(date => date !== dayStr) : [...current, dayStr])
+      return
+    }
+
+    if (!openEditor && window.matchMedia('(max-width: 639px)').matches) {
+      setMobileDetailDate(day)
       return
     }
     
@@ -230,11 +241,11 @@ export default function CalendarClient({
       )}
 
       {/* Intestazione Mese */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-brand/15 bg-accent/35 p-4 sm:px-5">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-brand/15 bg-accent/35 p-3 sm:p-4 sm:px-5">
         <h2 className="text-xl font-semibold capitalize tracking-[-0.02em]">
           {format(currentMonth, 'MMMM yyyy', { locale: it })}
         </h2>
-        <div className="flex items-center gap-2">
+        <div className="flex w-full items-center justify-between gap-2 sm:w-auto">
           <Button variant={isMultiSelecting ? 'default' : 'outline'} onClick={() => {
             if (isMultiSelecting) {
               setSelectedDates([])
@@ -248,16 +259,16 @@ export default function CalendarClient({
             {isMultiSelecting ? <X className="size-4" /> : <CalendarPlus className="size-4" />}
             <span>{isMultiSelecting ? 'Annulla' : 'Più giorni'}</span>
           </Button>
-          <Button variant="outline" size="icon" onClick={prevMonth} aria-label="Mese precedente">
+          <div className="flex gap-2"><Button variant="outline" size="icon" onClick={prevMonth} aria-label="Mese precedente">
             <ChevronLeft className="h-5 w-5" />
           </Button>
           <Button variant="outline" size="icon" onClick={nextMonth} aria-label="Mese successivo">
             <ChevronRight className="h-5 w-5" />
-          </Button>
+          </Button></div>
         </div>
       </div>
 
-      <div className="p-2 sm:p-4">
+      <div className="p-1.5 sm:p-4">
         {/* Nomi dei giorni della settimana */}
         <div className="grid grid-cols-7 gap-1 mb-2 sm:gap-2">
           {[
@@ -276,7 +287,7 @@ export default function CalendarClient({
           
           {/* Spazi vuoti di padding iniziale */}
           {Array.from({ length: paddingDays }).map((_, i) => (
-            <div key={`pad-${i}`} className="min-h-20 bg-muted/20 sm:min-h-24"></div>
+            <div key={`pad-${i}`} className="min-h-12 bg-muted/20 sm:min-h-24"></div>
           ))}
 
           {/* Giorni Reali */}
@@ -302,10 +313,10 @@ export default function CalendarClient({
                 role="button"
                 tabIndex={0}
                 aria-pressed={isMultiSelecting ? isSelected : undefined}
-                aria-label={`${format(day, 'd MMMM yyyy', { locale: it })}${dayEvent ? `, ${TYPE_LABELS[dayEvent.tipo] || dayEvent.tipo}` : ''}${isSelected ? ', selezionato' : ''}`}
+                aria-label={`${format(day, 'd MMMM yyyy', { locale: it })}${dayEvent ? `, ${TYPE_LABELS[dayEvent.tipo] || dayEvent.tipo}` : ''}${holidayName ? `, ${holidayName}` : ''}${scheduledPeople.length ? `, ${scheduledPeople.length} persone pianificate` : ''}${isSelected ? ', selezionato' : ''}`}
                 className={`
-                  min-h-20 sm:min-h-24 p-1.5 sm:p-2 rounded-sm border transition-colors relative flex flex-col group cursor-pointer overflow-hidden
-                  ${isSelected ? 'border-brand bg-accent ring-2 ring-brand ring-offset-1 dark:ring-offset-background'
+                  min-h-12 min-w-0 sm:min-h-24 p-1 sm:p-2 rounded-sm border transition-colors relative flex flex-col group cursor-pointer overflow-hidden focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-1
+                  ${isSelected || (!isMultiSelecting && mobileDetailDate && format(mobileDetailDate, 'yyyy-MM-dd') === dayStr) ? 'border-brand bg-accent ring-2 ring-brand ring-offset-1 dark:ring-offset-background'
                     : today ? 'border-blue-500 bg-blue-50/30 dark:bg-blue-950/20'
                     : holidayName && !dayEvent ? 'border-red-200 dark:border-red-900/50 bg-red-50/30 dark:bg-red-900/20' 
                     : weekend && !dayEvent ? 'border-border bg-muted/60'
@@ -314,7 +325,7 @@ export default function CalendarClient({
               >
                 {/* Etichetta del Giorno */}
                 <span className={`
-                  inline-flex items-center justify-center w-6 h-6 md:w-7 md:h-7 text-xs md:text-sm font-semibold rounded-full mb-1
+                  inline-flex items-center justify-center size-7 text-sm font-semibold rounded-full sm:mb-1
                   ${today ? 'bg-blue-600 dark:bg-blue-500 text-white' : 'text-foreground'}
                 `}>
                   {format(day, 'd')}
@@ -329,7 +340,7 @@ export default function CalendarClient({
                 {/* Contenuto del Giorno: L'Evento */}
                 {dayEvent ? (
                   <div className={`
-                    mt-auto p-1.5 rounded-sm border flex flex-col relative
+                    mt-auto hidden p-1.5 rounded-sm border sm:flex flex-col relative
                     ${TYPE_COLORS[dayEvent.tipo] || 'bg-muted'}
                   `}>
                     <span className="text-xs font-semibold leading-tight truncate">
@@ -342,7 +353,7 @@ export default function CalendarClient({
                     {/* Bottone Cancella (Appare solo quando passi col mouse) */}
                     <button 
                       onClick={(e) => handleDelete(dayEvent.id, e)}
-                      className="absolute -top-1.5 -right-1.5 rounded-sm border bg-background p-1 text-destructive transition-opacity hover:bg-destructive/10 md:opacity-0 group-hover:opacity-100"
+                      className="absolute -top-1.5 -right-1.5 grid size-8 place-items-center rounded-sm border bg-background text-destructive transition-opacity hover:bg-destructive/10 focus-visible:opacity-100 lg:opacity-0 group-hover:opacity-100"
                       title="Rimuovi"
                       aria-label={`Rimuovi ${TYPE_LABELS[dayEvent.tipo] || dayEvent.tipo} del ${format(day, 'd MMMM yyyy', { locale: it })}`}
                     >
@@ -352,12 +363,12 @@ export default function CalendarClient({
                 ) : holidayName ? (
                   // Marker Festività
                   <div className="absolute inset-x-1 bottom-1 flex items-center justify-center p-1 text-center text-xs leading-tight font-medium text-red-700 dark:text-red-400">
-                    {holidayName}
+                    <span className="hidden sm:inline">{holidayName}</span>
                   </div>
                 ) : weekend && !holidayName ? (
                   // Marker Weekend
                   <div className="absolute inset-x-1 bottom-1 flex items-center justify-center p-1 text-center text-xs leading-tight text-muted-foreground">
-                    {getDay(day) === 6 ? 'Sab' : 'Dom'}
+                    <span className="hidden sm:inline">{getDay(day) === 6 ? 'Sab' : 'Dom'}</span>
                   </div>
                 ) : null}
 
@@ -366,7 +377,7 @@ export default function CalendarClient({
                   <button
                     type="button"
                     onClick={(event) => { event.stopPropagation(); setTeamDetailDate(day) }}
-                    className="absolute right-1 top-1 z-20 inline-flex items-center gap-0.5 border border-brand/20 bg-card/95 px-1 py-1 text-[11px] font-semibold text-brand-strong shadow-[0_1px_3px_rgba(0,0,0,.08)] transition-colors hover:border-brand hover:bg-accent sm:gap-1 sm:px-1.5 dark:text-brand"
+                    className="absolute right-1 top-1 z-20 hidden min-h-8 items-center gap-0.5 border border-brand/20 bg-card/95 px-1 py-1 text-[11px] font-semibold text-brand-strong shadow-[0_1px_3px_rgba(0,0,0,.08)] transition-colors hover:border-brand hover:bg-accent sm:inline-flex sm:gap-1 sm:px-1.5 dark:text-brand"
                     aria-label={`Mostra le ${scheduledPeople.length} persone pianificate il ${format(day, 'd MMMM yyyy', { locale: it })}`}
                   >
                     <Users className="hidden size-3 shrink-0 sm:block" aria-hidden="true" />
@@ -375,10 +386,31 @@ export default function CalendarClient({
                   </button>
                 )}
 
+                <span className="mt-auto flex items-center justify-center gap-0.5 sm:hidden" aria-hidden="true">
+                  {dayEvent && <span className={`size-1.5 rounded-full ${dayEvent.tipo === 'smartworking' ? 'bg-blue-600' : dayEvent.tipo === 'ferie' ? 'bg-amber-500' : dayEvent.tipo === 'permesso' ? 'bg-violet-500' : dayEvent.tipo === 'malattia' ? 'bg-rose-500' : 'bg-emerald-600'}`} />}
+                  {scheduledPeople.length > 0 && <span className="size-1.5 rounded-full bg-brand" />}
+                </span>
+
               </div>
             )
           })}
         </div>
+      </div>
+
+      <div ref={mobileDetailRef} className="border-t px-4 py-4 sm:hidden" aria-live="polite">
+        {mobileDetailDate ? (() => {
+          const dateKey = format(mobileDetailDate, 'yyyy-MM-dd')
+          const event = events.find(item => item.data === dateKey)
+          const people = teamSchedule.filter(item => item.data === dateKey)
+          return <div className="space-y-3">
+            <div><p className="page-kicker">Giorno selezionato</p><h3 className="text-lg font-semibold capitalize">{format(mobileDetailDate, 'EEEE d MMMM', { locale: it })}</h3></div>
+            <p className="text-sm">{event ? `${TYPE_LABELS[event.tipo] || event.tipo}${event.mezza_giornata ? ' · Mezza giornata' : ''}` : getItalianHoliday(mobileDetailDate) || 'Nessuna pianificazione'}</p>
+            <div className="flex flex-wrap gap-2">
+              {event ? <Button variant="outline" className="text-destructive" onClick={click => handleDelete(event.id, click)}><Trash2 className="size-4" /> Rimuovi</Button> : <Button onClick={() => handleDayClick(mobileDetailDate, true)}><CalendarPlus className="size-4" /> Pianifica</Button>}
+              {people.length > 0 && <Button variant="outline" onClick={() => setTeamDetailDate(mobileDetailDate)}><Users className="size-4" /> Team ({people.length})</Button>}
+            </div>
+          </div>
+        })() : <p className="text-sm text-muted-foreground">Tocca un giorno per vedere i dettagli e pianificarlo.</p>}
       </div>
 
       {isMultiSelecting && (
@@ -479,8 +511,8 @@ export default function CalendarClient({
             <fieldset>
               <legend className="text-sm font-semibold">Durata</legend>
               <div className="mt-3 grid grid-cols-2 border bg-muted/35 p-1">
-                <button type="button" aria-pressed={isHalfDay === 'false'} onClick={() => setIsHalfDay('false')} className={`min-h-10 px-3 text-sm font-semibold transition-colors ${isHalfDay === 'false' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}>Giornata intera</button>
-                <button type="button" aria-pressed={isHalfDay === 'true'} onClick={() => setIsHalfDay('true')} className={`min-h-10 px-3 text-sm font-semibold transition-colors ${isHalfDay === 'true' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}>Mezza giornata</button>
+                <button type="button" aria-pressed={isHalfDay === 'false'} onClick={() => setIsHalfDay('false')} className={`min-h-11 px-2 text-sm font-semibold transition-colors ${isHalfDay === 'false' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}>Giornata intera</button>
+                <button type="button" aria-pressed={isHalfDay === 'true'} onClick={() => setIsHalfDay('true')} className={`min-h-11 px-2 text-sm font-semibold transition-colors ${isHalfDay === 'true' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}>Mezza giornata</button>
               </div>
             </fieldset>
 

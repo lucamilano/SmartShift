@@ -31,7 +31,7 @@ export function CalendarUserPicker({
   const [pending, startTransition] = useTransition()
 
   return (
-    <div className="w-full border-l-2 border-brand bg-accent/25 px-4 py-3 sm:w-80">
+    <div className="w-full min-w-0 border-l-2 border-brand bg-accent/25 px-4 py-3 sm:w-80">
       <Label htmlFor="calendar-user" className="mb-2 text-xs font-semibold uppercase tracking-wider text-brand-strong dark:text-brand">
         Calendario da gestire
       </Label>

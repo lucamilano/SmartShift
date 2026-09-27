@@ -16,12 +16,12 @@ export async function Navbar() {
   return (
     <nav className="sticky top-0 z-50 border-b bg-background/95">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 justify-between items-center">
+        <div className="flex h-16 min-w-0 justify-between gap-2 items-center">
           
-          <div className="flex items-center gap-6">
-            <Link href="/dashboard" className="flex items-center gap-2.5">
+          <div className="flex min-w-0 items-center gap-6">
+            <Link href="/dashboard" className="flex min-w-0 items-center gap-2.5">
               <span className="grid size-8 place-items-center bg-brand text-sm font-bold text-white" aria-hidden="true">S</span>
-              <span className="text-lg font-semibold tracking-[-0.03em]">SmartShift</span>
+              <span className="truncate text-base font-semibold tracking-[-0.03em] sm:text-lg">SmartShift</span>
             </Link>
             <div className="hidden items-center gap-5 md:flex">
               <NavLink href="/dashboard" exact>Dashboard</NavLink>
@@ -29,7 +29,7 @@ export async function Navbar() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex shrink-0 items-center gap-1 sm:gap-2">
             {isAdmin && (
               <div className="mr-1 hidden items-center gap-5 border-r pr-4 md:flex">
                 <NavLink href="/dashboard/esporta">Esporta</NavLink>
@@ -37,7 +37,7 @@ export async function Navbar() {
               </div>
             )}
             
-            <div className="flex items-center gap-2 sm:gap-3">
+            <div className="flex items-center gap-0 sm:gap-2">
               <ThemeToggle />
               
               <div className="hidden lg:block text-right border-l pl-3 ml-1">
@@ -53,7 +53,7 @@ export async function Navbar() {
         </div>
       </div>
 
-      {isAdmin && <div className="fixed bottom-0 left-0 right-0 z-50 border-t bg-card px-2 pb-safe shadow-[0_-8px_28px_-24px_rgba(0,0,0,.6)] md:hidden">
+      <div className="fixed bottom-0 left-0 right-0 z-50 border-t bg-card px-[max(0.5rem,env(safe-area-inset-left))] pb-[env(safe-area-inset-bottom)] pr-[max(0.5rem,env(safe-area-inset-right))] shadow-[0_-8px_28px_-24px_rgba(0,0,0,.6)] md:hidden" aria-label="Navigazione principale">
         <div className="flex h-16 items-center justify-around">
           <NavLink href="/dashboard" mobile exact>
             <LayoutDashboard className="h-5 w-5 mb-1" />
@@ -63,16 +63,16 @@ export async function Navbar() {
             <Calendar className="h-5 w-5 mb-1" />
             <span className="text-xs font-medium">Calendario</span>
           </NavLink>
-          <NavLink href="/dashboard/esporta" mobile>
+          {isAdmin && <NavLink href="/dashboard/esporta" mobile>
             <FileSpreadsheet className="h-5 w-5 mb-1" />
             <span className="text-xs font-medium">Esporta</span>
-          </NavLink>
-          <NavLink href="/dashboard/team" mobile>
+          </NavLink>}
+          {isAdmin && <NavLink href="/dashboard/team" mobile>
             <Users className="h-5 w-5 mb-1" />
             <span className="text-xs font-medium">Team</span>
-          </NavLink>
+          </NavLink>}
         </div>
-      </div>}
+      </div>
     </nav>
   )
 }

@@ -48,9 +48,9 @@ export default function ExportPage() {
           
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
             <div className="space-y-3">
-              <Label className="text-sm font-medium">Mese</Label>
+              <Label htmlFor="export-month" className="text-sm font-medium">Mese</Label>
               <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-                <SelectTrigger className="w-full">
+                <SelectTrigger id="export-month" className="w-full">
                   <SelectValue placeholder="Seleziona..." />
                 </SelectTrigger>
                 <SelectContent>
@@ -64,9 +64,9 @@ export default function ExportPage() {
             </div>
 
             <div className="space-y-3">
-              <Label className="text-sm font-medium">Anno</Label>
+              <Label htmlFor="export-year" className="text-sm font-medium">Anno</Label>
               <Select value={selectedYear} onValueChange={setSelectedYear}>
-                <SelectTrigger className="w-full">
+                <SelectTrigger id="export-year" className="w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -81,7 +81,7 @@ export default function ExportPage() {
           </div>
 
           <div className="pt-5 border-t flex justify-end">
-            <Button asChild>
+            <Button asChild className="w-full sm:w-auto">
               <a href={downloadUrl} download>
                 <Download className="mr-2 h-5 w-5" />
                 Scarica file Excel

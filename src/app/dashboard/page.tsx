@@ -28,7 +28,7 @@ export default async function DashboardPage() {
   const todayEvent = events.find(event => event.utente_id === user.id && event.data === format(today, 'yyyy-MM-dd'))
 
   return (
-    <div className="mx-auto max-w-6xl space-y-10">
+    <div className="mx-auto max-w-6xl space-y-8 sm:space-y-10">
       <header className="flex flex-col gap-5 border-b border-brand/15 pb-7 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="page-kicker">{format(today, 'EEEE d MMMM', { locale: it })}</p>
@@ -37,7 +37,7 @@ export default async function DashboardPage() {
             {isAdmin ? 'La situazione del team, dalla giornata di oggi alle tendenze del mese.' : 'La tua pianificazione, dalla giornata di oggi al riepilogo del mese.'}
           </p>
         </div>
-        <Link href="/dashboard/calendario" className="inline-flex items-center gap-2 text-sm font-semibold text-brand-strong hover:text-brand dark:text-brand">
+        <Link href="/dashboard/calendario" className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-brand-strong hover:text-brand focus-visible:outline-2 focus-visible:outline-ring dark:text-brand">
           Apri il calendario <ArrowRight className="size-4" aria-hidden="true" />
         </Link>
       </header>
@@ -68,16 +68,16 @@ export default async function DashboardPage() {
 
       <section aria-labelledby="week-title">
         <div className="mb-4"><p className="page-kicker">Da lunedì a venerdì</p><h2 id="week-title" className="text-2xl font-semibold tracking-[-0.03em]">Settimana in corso</h2></div>
-        <div className="overflow-x-auto border bg-card">
-          <div className="grid min-w-[680px] grid-cols-5 divide-x">
+        <div className="border bg-card">
+          <div className="divide-y lg:grid lg:grid-cols-5 lg:divide-x lg:divide-y-0">
             {summary.week.map(day => {
               const date = new Date(`${day.date}T12:00:00`)
               const isToday = day.date === format(today, 'yyyy-MM-dd')
               return (
                 <div key={day.date} className={isToday ? 'bg-accent/35' : undefined}>
-                  <div className="border-b px-4 py-3"><p className={`text-sm font-semibold capitalize ${isToday ? 'text-brand-strong dark:text-brand' : ''}`}>{format(date, 'EEEE', { locale: it })}</p><p className="text-xs text-muted-foreground">{format(date, 'd MMM')}</p></div>
-                  <dl className="space-y-2 px-4 py-3">
-                    {PRESENCE_TYPES.map(type => <div key={type} className="flex items-center justify-between gap-2 text-xs"><dt className="flex items-center gap-1.5 text-muted-foreground"><span className={`size-1.5 ${TYPE_STYLE[type]}`} />{PRESENCE_LABELS[type]}</dt><dd className="font-semibold tabular-nums">{formatDays(day.totals[type])}</dd></div>)}
+                  <div className="flex items-baseline justify-between gap-2 px-4 pt-4 lg:block lg:border-b lg:py-3"><p className={`text-sm font-semibold capitalize ${isToday ? 'text-brand-strong dark:text-brand' : ''}`}>{format(date, 'EEEE', { locale: it })}</p><p className="text-xs text-muted-foreground">{format(date, 'd MMM')}</p></div>
+                  <dl className="grid grid-cols-2 gap-x-5 gap-y-2 px-4 pb-4 pt-3 sm:grid-cols-3 lg:block lg:space-y-2 lg:py-3">
+                    {PRESENCE_TYPES.map(type => <div key={type} className="flex items-center justify-between gap-2 text-xs"><dt className="flex min-w-0 items-center gap-1.5 text-muted-foreground"><span className={`size-1.5 shrink-0 ${TYPE_STYLE[type]}`} />{PRESENCE_LABELS[type]}</dt><dd className="font-semibold tabular-nums">{formatDays(day.totals[type])}</dd></div>)}
                   </dl>
                 </div>
               )
