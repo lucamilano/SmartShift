@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { authClient } from '@/lib/auth-client'
 import { Input } from '@/components/ui/input'
+import { PasswordInput } from '@/components/ui/password-input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 
@@ -12,7 +13,7 @@ export default function LoginForm() {
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
   return (
-    <main className="auth-shell">
+    <main id="main-content" tabIndex={-1} className="auth-shell mobile-readable">
       <section className="auth-panel" aria-labelledby="login-title">
         <header className="mb-7">
           <p className="page-kicker">Pianificazione del lavoro</p>
@@ -53,9 +54,9 @@ export default function LoginForm() {
             } catch { setError('Accesso non riuscito. Riprova tra poco.') }
             setBusy(false)
           }}>
-            <div className="space-y-2"><Label htmlFor="email">Email</Label><Input id="email" name="email" type="email" autoComplete="username" required maxLength={254} /></div>
-            <div className="space-y-2"><Label htmlFor="password">Password</Label><Input id="password" name="password" type="password" autoComplete="current-password" required maxLength={128} /></div>
-            {error && <p role="alert" className="text-sm text-red-600 dark:text-red-400">{error}</p>}
+            <div className="space-y-2"><Label htmlFor="email">Email</Label><Input id="email" name="email" type="email" inputMode="email" autoCapitalize="none" autoComplete="username" aria-describedby={error ? 'login-error' : undefined} required maxLength={254} /></div>
+            <div className="space-y-2"><Label htmlFor="password">Password</Label><PasswordInput id="password" name="password" autoComplete="current-password" aria-describedby={error ? 'login-error' : undefined} required maxLength={128} /></div>
+            {error && <p id="login-error" role="alert" className="text-base text-red-800 dark:text-red-200">{error}</p>}
             <Button className="w-full" disabled={busy}>{busy ? 'Accesso in corso…' : 'Accedi'}</Button>
             <p className="text-xs text-muted-foreground">Se hai dimenticato la password, contatta l’amministratore per ripristinare l’accesso.</p>
           </form>

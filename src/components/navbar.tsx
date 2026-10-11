@@ -14,35 +14,35 @@ export async function Navbar() {
   const isAdmin = profile?.ruolo === 'admin'
   
   return (
-    <nav className="sticky top-0 z-50 border-b bg-background/95">
+    <header className="sticky top-0 z-40 border-b bg-background/95">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 min-w-0 justify-between gap-2 items-center">
           
           <div className="flex min-w-0 items-center gap-6">
-            <Link href="/dashboard" className="flex min-w-0 items-center gap-2.5">
-              <span className="grid size-8 place-items-center bg-brand text-sm font-bold text-white" aria-hidden="true">S</span>
+            <Link href="/dashboard" className="flex min-h-11 min-w-0 items-center gap-2.5">
+              <span className="grid size-8 shrink-0 place-items-center bg-primary text-sm font-bold text-primary-foreground" aria-hidden="true">S</span>
               <span className="truncate text-base font-semibold tracking-[-0.03em] sm:text-lg">SmartShift</span>
             </Link>
-            <div className="hidden items-center gap-5 md:flex">
+            <nav aria-label="Navigazione principale" className="hidden items-center gap-5 lg:flex">
               <NavLink href="/dashboard" exact>Dashboard</NavLink>
               <NavLink href="/dashboard/calendario">Calendario</NavLink>
-            </div>
+            </nav>
           </div>
 
           <div className="flex shrink-0 items-center gap-1 sm:gap-2">
             {isAdmin && (
-              <div className="mr-1 hidden items-center gap-5 border-r pr-4 md:flex">
+              <nav aria-label="Amministrazione" className="mr-1 hidden items-center gap-5 border-r pr-4 lg:flex">
                 <NavLink href="/dashboard/esporta">Esporta</NavLink>
                 <NavLink href="/dashboard/team">Team</NavLink>
-              </div>
+              </nav>
             )}
             
             <div className="flex items-center gap-0 sm:gap-2">
               <ThemeToggle />
               
-              <div className="hidden lg:block text-right border-l pl-3 ml-1">
-                <p className="text-sm font-medium">{profile?.nome || 'Utente'}</p>
-                <p className="text-xs text-muted-foreground">{user.email}</p>
+              <div className="hidden max-w-36 min-w-0 xl:block text-right border-l pl-3 ml-1">
+                <p className="truncate text-sm font-medium">{profile?.nome || 'Utente'}</p>
+                <p className="truncate text-xs text-muted-foreground">{user.email}</p>
               </div>
               
               <Button asChild variant="ghost" size="icon" title="Cambia password"><Link href="/dashboard/account" aria-label="Cambia password"><KeyRound className="h-5 w-5" /></Link></Button>
@@ -53,7 +53,7 @@ export async function Navbar() {
         </div>
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 z-50 border-t bg-card px-[max(0.5rem,env(safe-area-inset-left))] pb-[env(safe-area-inset-bottom)] pr-[max(0.5rem,env(safe-area-inset-right))] shadow-[0_-8px_28px_-24px_rgba(0,0,0,.6)] md:hidden" aria-label="Navigazione principale">
+      <nav className="fixed bottom-0 left-0 right-0 z-40 border-t bg-card px-[max(0.5rem,env(safe-area-inset-left))] pb-[env(safe-area-inset-bottom)] pr-[max(0.5rem,env(safe-area-inset-right))] shadow-[0_-8px_28px_-24px_rgba(0,0,0,.6)] lg:hidden" aria-label="Navigazione mobile">
         <div className="flex h-16 items-center justify-around">
           <NavLink href="/dashboard" mobile exact>
             <LayoutDashboard className="h-5 w-5 mb-1" />
@@ -72,7 +72,7 @@ export async function Navbar() {
             <span className="text-xs font-medium">Team</span>
           </NavLink>}
         </div>
-      </div>
-    </nav>
+      </nav>
+    </header>
   )
 }

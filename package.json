@@ -12,6 +12,8 @@
     "deploy": "npm run deploy:worker && npm run deploy:pages",
     "typecheck": "tsc --noEmit",
     "test": "tsx --test tests/*.test.ts",
+    "test:calendar-ui": "node scripts/check-calendar-ui.mjs",
+    "test:site-ui": "node scripts/check-site-ui.mjs",
     "db:migrate:local": "wrangler d1 migrations apply DB --local",
     "db:migrate:remote": "wrangler d1 migrations apply DB --remote",
     "deploy:worker": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",

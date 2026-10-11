@@ -31,7 +31,7 @@ export function CalendarUserPicker({
   const [pending, startTransition] = useTransition()
 
   return (
-    <div className="w-full min-w-0 border-l-2 border-brand bg-accent/25 px-4 py-3 sm:w-80">
+    <div className="calendar-user-picker w-full min-w-0 border-l-2 border-brand bg-accent/25 px-4 py-3 sm:w-80">
       <Label htmlFor="calendar-user" className="mb-2 text-xs font-semibold uppercase tracking-wider text-brand-strong dark:text-brand">
         Calendario da gestire
       </Label>
@@ -46,20 +46,20 @@ export function CalendarUserPicker({
           })
         }}
       >
-        <SelectTrigger id="calendar-user" className="w-full bg-card" aria-label="Scegli il calendario da gestire">
+        <SelectTrigger id="calendar-user" className="h-auto min-h-11 w-full bg-card text-base [&_[data-slot=select-value]]:whitespace-normal [&_[data-slot=select-value]]:break-words" aria-label="Scegli il calendario da gestire">
           <Users className="size-4 text-brand" aria-hidden="true" />
           <SelectValue />
         </SelectTrigger>
         <SelectContent position="popper" align="end">
           {users.map((user) => (
-            <SelectItem key={user.id} value={user.id}>
+            <SelectItem key={user.id} value={user.id} className="min-h-11 text-base">
               <span>{displayName(user)}{user.id === loggedUserId ? ' (tu)' : ''}</span>
               <span className="text-xs text-muted-foreground">{user.ruolo === 'admin' ? 'Admin' : 'Utente'}</span>
             </SelectItem>
           ))}
         </SelectContent>
       </Select>
-      <p className="mt-2 text-xs text-muted-foreground" aria-live="polite">
+      <p className="mt-2 text-base text-muted-foreground" aria-live="polite">
         {pending ? 'Apertura calendario…' : 'Puoi inserire e rimuovere turni per qualsiasi utente attivo.'}
       </p>
     </div>

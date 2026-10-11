@@ -15,6 +15,9 @@ export default function ExportPage() {
   const currentDate = new Date()
   const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth().toString())
   const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear().toString())
+  const [busy, setBusy] = useState(false)
+  const [message, setMessage] = useState('')
+  const [failed, setFailed] = useState(false)
 
   // Anni disponibili: L'anno scorso, l'anno corrente, il prossimo anno
   const years = [
@@ -25,6 +28,30 @@ export default function ExportPage() {
 
   // Costruiamo l'URL di download in base alle selezioni
   const downloadUrl = `/api/export-excel?month=${selectedMonth}&year=${selectedYear}`
+  const download = async () => {
+    setBusy(true)
+    setFailed(false)
+    setMessage('Preparazione del file Excel…')
+    try {
+      const response = await fetch(downloadUrl)
+      if (!response.ok) {
+        const result = await response.json().catch(() => null)
+        throw new Error(result?.error || 'Impossibile generare il file. Riprova.')
+      }
+      const url = URL.createObjectURL(await response.blob())
+      const link = document.createElement('a')
+      link.href = url
+      link.download = response.headers.get('Content-Disposition')?.match(/filename="?([^";]+)/)?.[1] || `Presenze-${selectedYear}-${Number(selectedMonth) + 1}.xlsx`
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      setTimeout(() => URL.revokeObjectURL(url), 1000)
+      setMessage('Il download del file Excel è stato avviato.')
+    } catch (error) {
+      setFailed(true)
+      setMessage(error instanceof Error && error.message !== 'Failed to fetch' ? error.message : 'Connessione non disponibile. Riprova a scaricare il file.')
+    } finally { setBusy(false) }
+  }
 
   return (
     <div className="max-w-3xl mx-auto space-y-7">
@@ -49,7 +76,7 @@ export default function ExportPage() {
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
             <div className="space-y-3">
               <Label htmlFor="export-month" className="text-sm font-medium">Mese</Label>
-              <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+              <Select disabled={busy} value={selectedMonth} onValueChange={setSelectedMonth}>
                 <SelectTrigger id="export-month" className="w-full">
                   <SelectValue placeholder="Seleziona..." />
                 </SelectTrigger>
@@ -65,7 +92,7 @@ export default function ExportPage() {
 
             <div className="space-y-3">
               <Label htmlFor="export-year" className="text-sm font-medium">Anno</Label>
-              <Select value={selectedYear} onValueChange={setSelectedYear}>
+              <Select disabled={busy} value={selectedYear} onValueChange={setSelectedYear}>
                 <SelectTrigger id="export-year" className="w-full">
                   <SelectValue />
                 </SelectTrigger>
@@ -81,13 +108,12 @@ export default function ExportPage() {
           </div>
 
           <div className="pt-5 border-t flex justify-end">
-            <Button asChild className="w-full sm:w-auto">
-              <a href={downloadUrl} download>
+            <Button type="button" onClick={download} disabled={busy} className="w-full sm:w-auto">
                 <Download className="mr-2 h-5 w-5" />
-                Scarica file Excel
-              </a>
+                {busy ? 'Preparazione…' : 'Scarica file Excel'}
             </Button>
           </div>
+          <p role={failed ? 'alert' : 'status'} className="text-base">{message}</p>
           
         </div>
       </section>

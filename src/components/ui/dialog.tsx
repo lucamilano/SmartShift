@@ -5,6 +5,7 @@ import { XIcon } from "lucide-react"
 import { Dialog as DialogPrimitive } from "radix-ui"
 
 import { cn } from "@/lib/utils"
+import { useViewportStyle } from "./use-viewport-style"
 
 function Dialog({
   ...props
@@ -26,7 +27,7 @@ function DialogOverlay({
     <DialogPrimitive.Overlay
       data-slot="dialog-overlay"
       className={cn(
-        "fixed inset-0 z-50 bg-black/50",
+        "fixed inset-0 z-[60] bg-black/60",
         className
       )}
       {...props}
@@ -38,32 +39,53 @@ function DialogContent({
   className,
   children,
   showCloseButton = true,
+  style,
+  onOpenAutoFocus,
+  onCloseAutoFocus,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean
 }) {
+  const viewportStyle = useViewportStyle()
+  const previousFocus = React.useRef<HTMLElement | null>(null)
   return (
     <DialogPortal data-slot="dialog-portal">
       <DialogOverlay />
+      <div className="dialog-positioner" style={viewportStyle}>
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
-          "bg-background fixed top-1/2 left-1/2 z-50 grid w-full max-h-[calc(100dvh-1rem)] max-w-[calc(100%-1rem)] -translate-x-1/2 -translate-y-1/2 gap-4 overflow-y-auto rounded-lg border p-5 shadow-lg outline-none sm:max-w-lg sm:p-6",
+          "app-dialog bg-background fixed z-[60] grid gap-4 overflow-y-auto rounded-lg border p-5 shadow-lg outline-none sm:p-6",
           className
         )}
         {...props}
+        data-compact-viewport={parseFloat(viewportStyle['--overlay-height'] ?? '999') < 420 || undefined}
+        style={{ ...viewportStyle, ...style }}
+        onOpenAutoFocus={event => {
+          previousFocus.current = document.activeElement instanceof HTMLElement ? document.activeElement : null
+          onOpenAutoFocus?.(event)
+        }}
+        onCloseAutoFocus={event => {
+          onCloseAutoFocus?.(event)
+          if (event.defaultPrevented) return
+          event.preventDefault()
+          const target = previousFocus.current
+          if (target?.isConnected) target.focus()
+          else document.querySelector<HTMLElement>('main button:not(:disabled), main a[href]')?.focus()
+        }}
       >
         {children}
         {showCloseButton && (
           <DialogPrimitive.Close
             data-slot="dialog-close"
-            className="ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute top-2 right-2 grid size-11 place-items-center rounded-sm transition-opacity hover:bg-accent focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none sm:top-3 sm:right-3 sm:size-9 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+            className="absolute top-2 right-2 z-10 grid size-11 place-items-center rounded-sm bg-background hover:bg-accent disabled:pointer-events-none sm:top-3 sm:right-3 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
           >
             <XIcon />
             <span className="sr-only">Chiudi</span>
           </DialogPrimitive.Close>
         )}
       </DialogPrimitive.Content>
+      </div>
     </DialogPortal>
   )
 }
@@ -72,7 +94,7 @@ function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="dialog-header"
-      className={cn("flex flex-col gap-2 text-center sm:text-left", className)}
+      className={cn("min-w-0 flex flex-col gap-2 pr-10 text-left", className)}
       {...props}
     />
   )
@@ -86,7 +108,7 @@ function DialogFooter({
     <div
       data-slot="dialog-footer"
       className={cn(
-        "flex flex-col-reverse gap-2 sm:flex-row sm:justify-end",
+        "dialog-footer flex min-w-0 flex-col-reverse gap-3 sm:flex-row sm:flex-wrap sm:justify-end",
         className
       )}
       {...props}
@@ -101,7 +123,7 @@ function DialogTitle({
   return (
     <DialogPrimitive.Title
       data-slot="dialog-title"
-      className={cn("text-lg leading-none font-semibold", className)}
+      className={cn("break-words text-xl leading-snug font-semibold", className)}
       {...props}
     />
   )
@@ -114,7 +136,7 @@ function DialogDescription({
   return (
     <DialogPrimitive.Description
       data-slot="dialog-description"
-      className={cn("text-muted-foreground text-sm", className)}
+      className={cn("break-words text-muted-foreground text-base", className)}
       {...props}
     />
   )

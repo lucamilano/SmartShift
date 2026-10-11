@@ -91,7 +91,7 @@ export default async function DashboardPage() {
           <div className="mb-4"><p className="page-kicker">{format(today, 'MMMM yyyy', { locale: it })}</p><h2 id="month-title" className="text-2xl font-semibold tracking-[-0.03em]">Riepilogo del mese</h2></div>
           <div className="border bg-card p-5 sm:p-6">
             <dl className="grid grid-cols-2 gap-x-8 gap-y-6 sm:grid-cols-5">
-              {PRESENCE_TYPES.map(type => <div key={type}><dt className="flex items-center gap-2 text-sm text-muted-foreground"><span className={`size-2 ${TYPE_STYLE[type]}`} />{PRESENCE_LABELS[type]}</dt><dd className="mt-2 text-3xl font-semibold tabular-nums">{formatDays(summary.monthTotals[type])}</dd><p className="mt-1 text-xs text-muted-foreground">giorni pianificati</p></div>)}
+              {PRESENCE_TYPES.map(type => <div key={type}><dt className="flex items-center gap-2 text-sm text-muted-foreground"><span className={`size-2 shrink-0 ${TYPE_STYLE[type]}`} aria-hidden="true" />{PRESENCE_LABELS[type]}</dt><dd className="mt-2"><span className="text-3xl font-semibold tabular-nums">{formatDays(summary.monthTotals[type])}</span><p className="mt-1 text-xs text-muted-foreground">giorni pianificati</p></dd></div>)}
             </dl>
           </div>
         </section>

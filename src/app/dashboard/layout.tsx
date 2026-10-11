@@ -15,7 +15,7 @@ export default async function DashboardLayout({
   return (
     <div className="min-h-screen flex flex-col font-sans text-foreground">
       <Navbar />
-      <main className="mx-auto w-full max-w-7xl min-w-0 flex-1 px-4 py-6 pb-[calc(6rem+env(safe-area-inset-bottom))] sm:px-6 sm:py-10 md:pb-10 lg:px-8">
+      <main id="main-content" tabIndex={-1} className="mobile-readable mx-auto w-full max-w-7xl min-w-0 flex-1 px-4 py-6 pb-[calc(6rem+env(safe-area-inset-bottom))] sm:px-6 sm:pt-10 lg:pb-10 lg:px-8">
         {children}
       </main>
     </div>

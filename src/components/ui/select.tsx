@@ -47,8 +47,8 @@ function SelectTrigger({
 function SelectContent({
   className,
   children,
-  position = "item-aligned",
-  align = "center",
+  position = "popper",
+  align = "start",
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Content>) {
   return (
@@ -56,21 +56,24 @@ function SelectContent({
       <SelectPrimitive.Content
         data-slot="select-content"
         className={cn(
-          "bg-popover text-popover-foreground relative z-50 max-h-(--radix-select-content-available-height) max-w-[calc(100vw-2rem)] min-w-[8rem] overflow-x-hidden overflow-y-auto rounded-md border shadow-md",
-          position === "popper" &&
-            "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1",
+          "bg-popover text-popover-foreground relative z-[70] max-h-[min(var(--radix-select-content-available-height),20rem)] max-w-[calc(100vw-2rem)] min-w-[8rem] overflow-x-hidden overflow-y-auto rounded-md border shadow-md",
           className
         )}
         position={position}
         align={align}
+        sideOffset={8}
+        collisionPadding={16}
         {...props}
       >
         <SelectScrollUpButton />
         <SelectPrimitive.Viewport
+          tabIndex={0}
+          role="group"
+          aria-label="Opzioni disponibili"
           className={cn(
             "p-1",
             position === "popper" &&
-              "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)] scroll-my-1"
+              "w-full min-w-[min(var(--radix-select-trigger-width),calc(100vw-2rem))] scroll-my-1"
           )}
         >
           {children}

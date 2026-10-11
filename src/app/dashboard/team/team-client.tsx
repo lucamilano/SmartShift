@@ -68,6 +68,8 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
   const [editCognome, setEditCognome] = useState('')
   const [editRuolo, setEditRuolo] = useState('')
   const [loading, setLoading] = useState(false)
+  const [status, setStatus] = useState('')
+  const [copyStatus, setCopyStatus] = useState('')
 
   // Stati Modale Nuovo Collega
   const [isNewUserModalOpen, setIsNewUserModalOpen] = useState(false)
@@ -84,7 +86,17 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
   const [userToDelete, setUserToDelete] = useState<Member | null>(null)
 
+  const runOperation = async (operation: () => Promise<void>) => {
+    if (loading) return
+    setLoading(true)
+    setStatus('')
+    try { await operation() }
+    catch { showAlert('Servizio non disponibile. Riprova: i dati inseriti sono stati conservati.') }
+    finally { setLoading(false) }
+  }
+
   const handleEditClick = (member: Member) => {
+    if (loading) return
     setSelectedUser(member)
     setEditNome(member.nome || '')
     setEditCognome(member.cognome || '')
@@ -93,62 +105,62 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
   }
 
   const handleDeleteClick = (member: Member) => {
+    if (loading) return
     setUserToDelete(member)
     setDeleteConfirmOpen(true)
   }
 
   const handleSaveEdit = async () => {
     if (!selectedUser) return
-    setLoading(true)
+    await runOperation(async () => {
     const res = await updateProfile(selectedUser.id, editNome, editCognome, editRuolo)
-    setLoading(false)
-    
     if (res.error) {
-      setAlertMessage(res.error)
-      setAlertOpen(true)
+      showAlert(res.error)
     } else {
       // Aggiorniamo la UI in locale
       setMembers(members.map(m => m.id === selectedUser.id ? { ...m, nome: editNome, cognome: editCognome, ruolo: editRuolo } : m))
       setIsEditModalOpen(false)
+      setStatus('Dati del collega aggiornati.')
     }
+    })
   }
 
   const handleConfirmDelete = async () => {
     if (!userToDelete) return
-    setLoading(true)
+    await runOperation(async () => {
     const res = await deleteUserAction(userToDelete.id)
-    setLoading(false)
 
     if (res.error) {
       setDeleteConfirmOpen(false)
-      setAlertMessage(res.error)
-      setAlertOpen(true)
+      showAlert(res.error)
     } else {
       setMembers(members.filter(m => m.id !== userToDelete.id))
       setDeleteConfirmOpen(false)
+      setStatus('Account rimosso.')
     }
+    })
   }
 
   const showAlert = (message: string, password?: string) => {
     setAlertMessage(message)
     setTemporaryPassword(password || null)
+    setCopyStatus('')
     setAlertOpen(true)
   }
 
   const handleCreateUser = async () => {
-    setLoading(true)
+    await runOperation(async () => {
     const result = await createUserAction(newNome, newCognome, newEmail)
-    setLoading(false)
     if (result.error) return showAlert(result.error)
     if (result.member) setMembers(current => [...current, result.member].sort((a, b) => `${a.cognome} ${a.nome}`.localeCompare(`${b.cognome} ${b.nome}`)))
     setNewNome(''); setNewCognome(''); setNewEmail(''); setIsNewUserModalOpen(false)
     showAlert(result.warning || 'Account creato e invito inviato.', result.temporaryPassword)
+    })
   }
 
   const handleResendInvitation = async (member: Member) => {
-    setLoading(true)
+    await runOperation(async () => {
     const result = await resendInvitationAction(member.id)
-    setLoading(false)
     if (result.error) {
       setMembers(current => current.map(item => item.id === member.id ? { ...item, invitation_status: 'failed' } : item))
       showAlert(result.error, result.temporaryPassword)
@@ -156,6 +168,7 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
       setMembers(current => current.map(item => item.id === member.id ? { ...item, invitation_status: 'sent' } : item))
       showAlert('Nuova password temporanea inviata. Quella precedente non è più valida.')
     }
+    })
   }
 
   return (
@@ -172,15 +185,16 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
             Presenze di oggi e anagrafica dei colleghi.
           </p>
         </div>
-        <Button className="w-full sm:w-auto" onClick={() => setIsNewUserModalOpen(true)}>
+        <Button disabled={loading} className="w-full sm:w-auto" onClick={() => setIsNewUserModalOpen(true)}>
           Nuovo collega
         </Button>
       </header>
+      <p role="status" className={status ? 'rounded-md border bg-accent p-3 text-base' : 'sr-only'}>{loading ? 'Operazione in corso…' : status}</p>
 
       {/* Panoramica di Oggi */}
       <section className="border-l-2 border-brand bg-accent/25 px-5 py-4" aria-labelledby="today-title">
         <h2 id="today-title" className="text-sm font-semibold text-brand-strong dark:text-brand">Situazione di oggi</h2>
-        <dl className="mt-3 grid grid-cols-2 gap-y-4 sm:grid-cols-3 md:grid-cols-6 md:divide-x md:divide-brand/15">
+        <dl className="mt-3 grid grid-cols-2 gap-x-3 gap-y-4 sm:grid-cols-3 lg:grid-cols-6 lg:divide-x lg:divide-brand/15">
           <div className="md:px-4 md:first:pl-0"><dt className="text-sm text-muted-foreground">In ufficio</dt><dd className="mt-1 text-2xl font-semibold tabular-nums text-brand-strong dark:text-brand">{stats.ufficio}</dd></div>
           <div className="md:px-4"><dt className="text-sm text-muted-foreground">Smartworking</dt><dd className="mt-1 text-2xl font-semibold tabular-nums text-brand-strong dark:text-brand">{stats.smartworking}</dd></div>
           <div className="md:px-4"><dt className="text-sm text-muted-foreground">Permesso</dt><dd className="mt-1 text-2xl font-semibold tabular-nums">{stats.permesso}</dd></div>
@@ -198,7 +212,7 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
         </div>
         <div>
           {/* Visualizzazione Mobile (Lista a schede compatte) */}
-          <div className="flex flex-col divide-y md:hidden">
+          <div className="flex flex-col divide-y lg:hidden">
             {members.map((member) => {
               const todayStatus = todaysEvents.find(e => e.utente_id === member.id)
 
@@ -230,7 +244,7 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
                     <TodayStatus event={todayStatus} />
                   </div>
                   
-                  <div className="mt-1 flex flex-wrap justify-end gap-1 border-t pt-3 sm:gap-2">
+                  <div className="mt-1 flex flex-wrap justify-end gap-2 border-t pt-3">
                     <Button variant="outline" size="sm" asChild className="w-full sm:w-auto sm:flex-1">
                       <Link href={`/dashboard/calendario?userId=${member.id}`}>
                         <CalendarDays className="h-3.5 w-3.5 mr-1" /> Calendario
@@ -239,9 +253,10 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
                     <Button 
                       variant="ghost" 
                       size="icon" 
+                      disabled={loading}
                       onClick={() => handleEditClick(member)}
                       className="shrink-0"
-                      aria-label="Modifica dati anagrafici"
+                      aria-label={`Modifica dati di ${member.nome || member.email}`}
                     >
                       <FileEdit className="h-4 w-4" />
                     </Button>
@@ -249,9 +264,10 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
                     <Button 
                       variant="ghost" 
                       size="icon" 
+                      disabled={loading}
                       onClick={() => handleDeleteClick(member)}
                       className="shrink-0 text-destructive"
-                      aria-label="Rimuovi account"
+                      aria-label={`Rimuovi account di ${member.nome || member.email}`}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -262,7 +278,7 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
           </div>
 
           {/* Visualizzazione Desktop (Tabella Classica) */}
-          <div className="hidden md:block overflow-x-auto">
+          <div className="hidden lg:block overflow-x-auto">
             <Table>
             <TableHeader>
               <TableRow>
@@ -334,30 +350,28 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
       </section>
 
       {/* --- Modale di Modifica Dati --- */}
-      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-        <DialogContent className="sm:max-w-md">
+      <Dialog open={isEditModalOpen} onOpenChange={open => { if (!loading) setIsEditModalOpen(open) }}>
+        <DialogContent className="dialog-form sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="text-xl">Modifica anagrafica</DialogTitle>
-            <DialogDescription>
-              Modifica i dati di questo collega. Per cambiare l’email, contatta il supporto.
-            </DialogDescription>
           </DialogHeader>
-          
-          <div className="space-y-4 py-4">
+          <form className="contents" onSubmit={event => { event.preventDefault(); void handleSaveEdit() }}>
+          <div className="dialog-body space-y-4">
+            <DialogDescription>Modifica i dati di questo collega. Per cambiare l’email, contatta il supporto.</DialogDescription>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="nome" className="text-sm font-semibold">Nome</Label>
-                <Input id="nome" value={editNome} onChange={(e) => setEditNome(e.target.value)} />
+                <Input id="nome" name="nome" disabled={loading} maxLength={100} autoComplete="off" value={editNome} onChange={(e) => setEditNome(e.target.value)} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="cognome" className="text-sm font-semibold">Cognome</Label>
-                <Input id="cognome" value={editCognome} onChange={(e) => setEditCognome(e.target.value)} />
+                <Input id="cognome" name="cognome" disabled={loading} maxLength={100} autoComplete="off" value={editCognome} onChange={(e) => setEditCognome(e.target.value)} />
               </div>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="editRuolo" className="text-sm font-semibold">Qualifica / Ruolo nel Sistema</Label>
-              <Select value={editRuolo} onValueChange={(val: string) => setEditRuolo(val)}>
+              <Select disabled={loading} value={editRuolo} onValueChange={(val: string) => setEditRuolo(val)}>
                 <SelectTrigger id="editRuolo" className="w-full">
                   <SelectValue />
                 </SelectTrigger>
@@ -370,35 +384,38 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
           </div>
           
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setIsEditModalOpen(false)}>Annulla</Button>
-            <Button onClick={handleSaveEdit} disabled={loading}>
+            <Button type="button" variant="ghost" disabled={loading} onClick={() => setIsEditModalOpen(false)}>Annulla</Button>
+            <Button type="submit" disabled={loading}>
               {loading ? 'Salvataggio...' : 'Salva modifiche'}
             </Button>
           </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
 
       {/* --- Modale "Nuovo Collega" --- */}
-      <Dialog open={isNewUserModalOpen} onOpenChange={setIsNewUserModalOpen}>
-        <DialogContent className="sm:max-w-md">
+      <Dialog open={isNewUserModalOpen} onOpenChange={open => { if (!loading) setIsNewUserModalOpen(open) }}>
+        <DialogContent className="dialog-form sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="text-xl">
               Aggiungi nuovo dipendente
             </DialogTitle>
-            <DialogDescription>Il nuovo account sarà un utente base e riceverà una password temporanea valida 24 ore.</DialogDescription>
           </DialogHeader>
-          <div className="py-4 space-y-4">
+          <form className="contents" onSubmit={event => { event.preventDefault(); void handleCreateUser() }}>
+          <div className="dialog-body space-y-4">
+            <DialogDescription>Il nuovo account sarà un utente base e riceverà una password temporanea valida 24 ore.</DialogDescription>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div className="space-y-2"><Label htmlFor="newNome">Nome</Label><Input id="newNome" value={newNome} onChange={event => setNewNome(event.target.value)} required maxLength={100} /></div>
-              <div className="space-y-2"><Label htmlFor="newCognome">Cognome</Label><Input id="newCognome" value={newCognome} onChange={event => setNewCognome(event.target.value)} required maxLength={100} /></div>
+              <div className="space-y-2"><Label htmlFor="newNome">Nome</Label><Input id="newNome" name="nome" disabled={loading} autoComplete="off" value={newNome} onChange={event => setNewNome(event.target.value)} required maxLength={100} /></div>
+              <div className="space-y-2"><Label htmlFor="newCognome">Cognome</Label><Input id="newCognome" name="cognome" disabled={loading} autoComplete="off" value={newCognome} onChange={event => setNewCognome(event.target.value)} required maxLength={100} /></div>
             </div>
-            <div className="space-y-2"><Label htmlFor="newEmail">Email</Label><Input id="newEmail" value={newEmail} onChange={event => setNewEmail(event.target.value)} type="email" required maxLength={254} autoComplete="off" /></div>
+            <div className="space-y-2"><Label htmlFor="newEmail">Email</Label><Input id="newEmail" name="email" disabled={loading} value={newEmail} onChange={event => setNewEmail(event.target.value)} type="email" inputMode="email" autoCapitalize="none" required maxLength={254} autoComplete="off" /></div>
             <p className="text-xs text-muted-foreground">Il ruolo amministratore potrà essere assegnato in seguito con “Modifica”.</p>
           </div>
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setIsNewUserModalOpen(false)} disabled={loading}>Annulla</Button>
-            <Button onClick={handleCreateUser} disabled={loading || !newNome.trim() || !newCognome.trim() || !newEmail.trim()}>{loading ? 'Creazione…' : 'Crea e invia invito'}</Button>
+            <Button type="button" variant="ghost" onClick={() => setIsNewUserModalOpen(false)} disabled={loading}>Annulla</Button>
+            <Button type="submit" disabled={loading || !newNome.trim() || !newCognome.trim() || !newEmail.trim()}>{loading ? 'Creazione…' : 'Crea e invia invito'}</Button>
           </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
 
@@ -407,24 +424,28 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Esito dell’operazione</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogDescription asChild><div>
               <p>{alertMessage}</p>
               {temporaryPassword && <div className="mt-4 rounded-md border border-amber-300 bg-amber-50 p-3 text-amber-950 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-100">
                 <p className="font-medium">Password temporanea da consegnare con un canale sicuro</p>
                 <code className="mt-2 block break-all rounded bg-background p-2 font-mono text-sm">{temporaryPassword}</code>
                 <p className="mt-2 text-xs">È visibile soltanto ora e verrà sostituita obbligatoriamente al primo accesso.</p>
               </div>}
-            </AlertDialogDescription>
+            </div></AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            {temporaryPassword && <Button type="button" variant="outline" onClick={() => navigator.clipboard.writeText(temporaryPassword)}>Copia password</Button>}
+            {temporaryPassword && <Button type="button" variant="outline" onClick={async () => {
+              try { await navigator.clipboard.writeText(temporaryPassword); setCopyStatus('Password copiata.') }
+              catch { setCopyStatus('Copia non riuscita. Seleziona e copia il testo della password.') }
+            }}>Copia password</Button>}
             <AlertDialogAction>Ho capito</AlertDialogAction>
           </AlertDialogFooter>
+          <p role="status" className={copyStatus ? 'text-base' : 'sr-only'}>{copyStatus}</p>
         </AlertDialogContent>
       </AlertDialog>
 
       {/* --- Modale Conferma Cancellazione --- */}
-      <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+      <AlertDialog open={deleteConfirmOpen} onOpenChange={open => { if (!loading) setDeleteConfirmOpen(open) }}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Rimuovere l’account?</AlertDialogTitle>
@@ -435,7 +456,7 @@ export default function TeamClient({ initialMembers, todaysEvents, stats }: { in
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={loading}>Annulla</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmDelete} disabled={loading} variant="destructive">
+            <AlertDialogAction onClick={event => { event.preventDefault(); void handleConfirmDelete() }} disabled={loading} variant="destructive">
               {loading ? 'Rimozione in corso...' : 'Sì, rimuovi utente'}
             </AlertDialogAction>
           </AlertDialogFooter>

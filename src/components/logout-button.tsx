@@ -11,7 +11,7 @@ export function LogoutButton() {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   return (
-    <div>
+    <div className="relative">
       <Button variant="ghost" size="icon" title="Esci" aria-label="Esci" disabled={busy} onClick={async () => {
         setBusy(true)
         setError('')
@@ -22,7 +22,7 @@ export function LogoutButton() {
           router.refresh()
         } catch { setError('Riprova a uscire.'); setBusy(false) }
       }}><LogOut className="h-5 w-5" /></Button>
-      {error && <span role="alert" className="text-xs text-destructive">{error}</span>}
+      {error && <p role="alert" className="absolute right-0 top-full z-50 w-48 rounded-md border bg-card p-3 text-base text-destructive">{error}</p>}
     </div>
   )
 }

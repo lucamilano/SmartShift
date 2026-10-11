@@ -36,10 +36,10 @@ export default async function CalendarioPage({ searchParams }: { searchParams: P
           <h1 className="page-title">
             {targetUserName ? `Calendario di ${targetUserName}` : 'Il mio calendario'}
           </h1>
-          <p className="mt-3 max-w-3xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+          <p className="mt-3 max-w-3xl text-base leading-relaxed text-muted-foreground">
             {targetUserName
               ? 'Stai modificando la pianificazione di questo collega.'
-              : 'Seleziona un giorno per aggiungere una presenza; usa il cestino per rimuoverla.'}
+              : 'Pianifica le tue giornate e consulta le attività del team. Con “Più giorni” puoi organizzare più date insieme.'}
           </p>
         </div>
         {user.ruolo === 'admin' && (
@@ -47,7 +47,7 @@ export default async function CalendarioPage({ searchParams }: { searchParams: P
         )}
       </header>
 
-      <CalendarClient initialEvents={initialEvents || []} initialTeamSchedule={initialTeamSchedule || []} targetUserId={effectiveUserId} targetUserName={targetUserName} />
+      <CalendarClient key={effectiveUserId} initialEvents={initialEvents || []} initialTeamSchedule={initialTeamSchedule || []} targetUserId={effectiveUserId} targetUserName={targetUserName} />
     </div>
   )
 }
