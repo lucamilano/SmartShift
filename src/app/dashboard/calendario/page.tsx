@@ -1,7 +1,7 @@
 import { requireUser, getRepository } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import CalendarClient from './calendar-client'
-import { startOfMonth, endOfMonth, format } from 'date-fns'
+import { startOfMonth, endOfMonth, startOfWeek, endOfWeek, format } from 'date-fns'
 import { getTeamSchedule } from './actions'
 import { CalendarUserPicker } from './calendar-user-picker'
 
@@ -21,15 +21,16 @@ export default async function CalendarioPage({ searchParams }: { searchParams: P
     ([targetProfile.nome, targetProfile.cognome].filter(Boolean).join(' ') || targetProfile.email)
 
   // Carichiamo gli eventi del mese corrente per il primo rendering
-  const startDate = format(startOfMonth(new Date()), 'yyyy-MM-dd')
-  const endDate = format(endOfMonth(new Date()), 'yyyy-MM-dd')
+  const today = new Date()
+  const startDate = format(startOfWeek(startOfMonth(today), { weekStartsOn: 1 }), 'yyyy-MM-dd')
+  const endDate = format(endOfWeek(endOfMonth(today), { weekStartsOn: 1 }), 'yyyy-MM-dd')
 
   const initialEvents = await repository.events(startDate, endDate, effectiveUserId)
 
   const initialTeamSchedule = await getTeamSchedule(startDate, endDate)
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
+    <div className="max-w-6xl mx-auto space-y-6">
       <header className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="page-kicker">Pianificazione mensile</p>
